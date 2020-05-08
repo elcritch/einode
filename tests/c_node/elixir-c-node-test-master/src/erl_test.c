@@ -164,7 +164,13 @@ int main(int argc, char **argv)
         fprintf(stderr, "Available to write\n");
       }
     }
+    // outgoing.buff = malloc(sizeof(ei_x_buff));
+    // outgoing.recipient = malloc(sizeof(erlang_pid));
+    // read(efd, &outgoing, n_bytes);
+    // erlang_pid *to = outgoing.recipient;
+    // ei_x_buff *buff = outgoing.buff;
+    // ei_send(fd, to, buff->buff, buff->index);
+    // ei_x_free(buff);
 
-  } 
+  } /* while */
 }
-

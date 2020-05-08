@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "ei.h": "c",
+        "inet.h": "c",
+        "in.h": "c",
+        "socket.h": "c",
+        "types.h": "c",
+        "stdio.h": "c",
+        "utils.h": "c",
+        "spawn.h": "c",
+        "uthash.h": "c",
+        "dispatchers.h": "c",
+        "unistd.h": "c",
+        "pthread.h": "c",
+        "eventfd.h": "c",
+        "select.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c"
+    }
+}
