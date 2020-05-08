@@ -56,8 +56,14 @@ proc main*(argc: cint; argv: cstringArray): cint =
   ##    &addr, "secretcookie", 0) == -1)
   ##      erl_err_quit("erl_connect_xinit");
   start_sampling(addr(sampling_info))
-  fd = start_socket(addr(ec), addr(`addr`), port, "cmd", "localhost", "127.0.0.1",
-                  "secretcookie")
+  fd = start_socket(
+        addr(ec),
+        addr(`addr`),
+        port,
+        "cmd",
+        "localhost",
+        "127.0.0.1",
+        "secretcookie")
   ##  Initialize eventfd signaling
   efd = eventfd(0, 0)
   max_fd = efd
