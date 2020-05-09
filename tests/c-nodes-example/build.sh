@@ -35,5 +35,9 @@ gcc -o cclient \
 	complex.c cnode_c.c \
 	-lerl_interface -lei -lpthread
 
-nim c --d:debug cnode_ei_s3.nim
+nim c --d:debug \
+	--passC="-I$INCLUDE_DIR" \
+	--passL="-L$LIB_DIR" \
+	cnode_ei_s3.nim 
+
 

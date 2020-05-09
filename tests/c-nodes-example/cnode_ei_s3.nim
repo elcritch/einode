@@ -27,9 +27,11 @@ proc my_listen*(port: Port): Socket =
   socket.listen()
   return socket
 
-proc main*(argc: cint; argv: cstringArray): cint =
+proc main*() =
   let arguments = commandLineParams()
   var port: Port = Port(parseInt($(arguments[0])))
+
+  echo("starting: " )
 
   discard ei_init()
 
@@ -72,6 +74,7 @@ proc main*(argc: cint; argv: cstringArray): cint =
     if got == ERL_TICK():
       echo("tick: " & $got)
     elif got == ERL_ERROR():
+      echo("err: " )
       loop = false
       raise newException(LibraryError, "erl_error: " & $got)
     else:
@@ -129,3 +132,6 @@ proc new_ei_x_size(x: ptr EiBuff; size: int): cint =
   x.buffsz = size.cint
   x.index = 0
   return if x.buff != nil: 0 else: -1
+
+when isMainModule:
+  main()
