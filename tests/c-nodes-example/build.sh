@@ -13,25 +13,25 @@ gcc -o cserver \
 	-Wno-deprecated-declarations \
 	-I$INCLUDE_DIR -L$LIB_DIR \
 	complex.c cnode_s.c \
-	-lerl_interface -lei 
+	-lerl_interface -lei -lpthread
 
 gcc -o cserver2 \
 	-Wno-implicit-function-declaration \
 	-Wno-deprecated-declarations \
 	-I$INCLUDE_DIR -L$LIB_DIR \
 	complex.c cnode_s2.c \
-	-lerl_interface -lei 
+	-lerl_interface -lei -lpthread
 
 gcc -o cserver_ei3 \
 	-Wno-implicit-function-declaration \
 	-I$INCLUDE_DIR -L$LIB_DIR \
 	complex.c cnode_ei_s2.c \
-	-lerl_interface -lei 
+	-lerl_interface -lei -lpthread
 
 gcc -o cclient \
 	-Wno-implicit-function-declaration \
 	-Wno-deprecated-declarations \
 	-I$INCLUDE_DIR -L$LIB_DIR \
 	complex.c cnode_c.c \
-	-lerl_interface -lei 
+	-lerl_interface -lei -lpthread
 
