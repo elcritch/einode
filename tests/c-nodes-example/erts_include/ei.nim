@@ -198,7 +198,7 @@ type
 ##  a pid
 
 type
-  ErlangPid* {.importc: "ErlangPid", header: "ei.h", bycopy.} = object
+  ErlangPid* {.importc: "erlang_pid", header: "ei.h", bycopy.} = object
     node* {.importc: "node".}: array[MAXATOMLEN_UTF8, char]
     num* {.importc: "num".}: cuint
     serial* {.importc: "serial".}: cuint
@@ -208,7 +208,7 @@ type
 ##  a port
 
 type
-  ErlangPort* {.importc: "ErlangPort", header: "ei.h", bycopy.} = object
+  ErlangPort* {.importc: "erlang_port", header: "ei.h", bycopy.} = object
     node* {.importc: "node".}: array[MAXATOMLEN_UTF8, char]
     id* {.importc: "id".}: cuint
     creation* {.importc: "creation".}: cuint
@@ -217,7 +217,7 @@ type
 ##  a ref
 
 type
-  ErlangRef* {.importc: "ErlangRef", header: "ei.h", bycopy.} = object
+  ErlangRef* {.importc: "erlang_ref", header: "ei.h", bycopy.} = object
     node* {.importc: "node".}: array[MAXATOMLEN_UTF8, char]
     len* {.importc: "len".}: cint
     n* {.importc: "n".}: array[3, cuint]
@@ -227,7 +227,7 @@ type
 ##  a trace token
 
 type
-  ErlangTrace* {.importc: "ErlangTrace", header: "ei.h", bycopy.} = object
+  ErlangTrace* {.importc: "erlang_trace", header: "ei.h", bycopy.} = object
     serial* {.importc: "serial".}: clong
     prev* {.importc: "prev".}: clong
     `from`* {.importc: "from".}: ErlangPid
@@ -238,7 +238,7 @@ type
 ##  a message
 
 type
-  ErlangMsg* {.importc: "ErlangMsg", header: "ei.h", bycopy.} = object
+  ErlangMsg* {.importc: "erlang_msg", header: "ei.h", bycopy.} = object
     msgtype* {.importc: "msgtype".}: clong
     `from`* {.importc: "from".}: ErlangPid
     to* {.importc: "to".}: ErlangPid
@@ -289,12 +289,12 @@ type
     port* {.importc: "port".}: ErlangPort
     `ref`* {.importc: "ref".}: ErlangRef
 
-  ErlangBig* {.importc: "ErlangBig", header: "ei.h", bycopy.} = object
+  ErlangBig* {.importc: "erlang_big", header: "ei.h", bycopy.} = object
     arity* {.importc: "arity".}: cuint
     is_neg* {.importc: "is_neg".}: cint
     digits* {.importc: "digits".}: pointer
 
-  EiTerm* {.importc: "EiTerm", header: "ei.h", bycopy.} = object
+  EiTerm* {.importc: "ei_term", header: "ei.h", bycopy.} = object
     ei_type* {.importc: "ei_type".}: char
     arity* {.importc: "arity".}: cint
     size* {.importc: "size".}: cint
@@ -304,7 +304,7 @@ type
 ##  XXX
 
 type
-  ErlConnect* {.importc: "ErlConnect", header: "ei.h", bycopy.} = object
+  ErlConnect* {.importc: "erl_connect", header: "ei.h", bycopy.} = object
     ipadr* {.importc: "ipadr".}: array[4, char] ##  stored in network byte order
     nodename* {.importc: "nodename".}: array[MAXNODELEN + 1, char]
 
@@ -314,7 +314,7 @@ const
   EI_SCLBK_FLG_FULL_IMPL* = (1 shl 0)
 
 type
-  EiSocketCallbacks* {.importc: "EiSocketCallbacks", header: "ei.h", bycopy.} = object
+  EiSocketCallbacks* {.importc: "ei_socket_callbacks", header: "ei.h", bycopy.} = object
     flags* {.importc: "flags".}: cint
     socket* {.importc: "socket".}: proc (ctx: ptr pointer; setup_ctx: pointer): cint {.
         cdecl.}
@@ -339,7 +339,7 @@ type
         ctx: pointer): cint {.cdecl.}
     get_fd* {.importc: "get_fd".}: proc (ctx: pointer; fd: ptr cint): cint {.cdecl.} ##  end of version 1
 
-  EiCnode* {.importc: "EiCnode", header: "ei.h", bycopy.} = object
+  EiCnode* {.importc: "ei_cnode", header: "ei.h", bycopy.} = object
     thishostname* {.importc: "thishostname".}: array[EI_MAXHOSTNAMELEN + 1, char]
     thisnodename* {.importc: "thisnodename".}: array[MAXNODELEN + 1, char]
     thisalivename* {.importc: "thisalivename".}: array[EI_MAXALIVELEN + 1, char] ##  Currently this_ipaddr isn't used
