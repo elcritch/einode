@@ -9,7 +9,7 @@ defmodule Complex4 do
 	end
 
 	def call_cnode(msg) do
-		{:any, :'cnode@Juliette-2052.local'}
+		{:any, :'cnode@127.0.0.1'}
 		|> send({:call, self(), msg})
 
 	  receive do

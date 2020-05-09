@@ -34,7 +34,7 @@ int main(int argc, char **argv)
         &ec,
         "alpha",
         "cnode",
-        "cnode@Juliette-2052.local",
+        "cnode@127.0.0.1",
         &addr,
         "secretcookie",
         0) < 0) {
