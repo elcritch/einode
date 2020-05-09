@@ -304,7 +304,7 @@ type
 ##  XXX
 
 type
-  ErlConnect* {.importc: "erl_connect", header: "ei.h", bycopy.} = object
+  ErlConnect* {.importc: "ErlConnect", header: "ei.h", bycopy.} = object
     ipadr* {.importc: "ipadr".}: array[4, char] ##  stored in network byte order
     nodename* {.importc: "nodename".}: array[MAXNODELEN + 1, char]
 
