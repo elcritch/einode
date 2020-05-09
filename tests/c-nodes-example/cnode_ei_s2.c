@@ -49,11 +49,11 @@ int main(int argc, char **argv)
     exit(-1);
   }
 
-  if (ei_publish(&ec, port) == -1)
-  {
-    fprintf(stderr, "ERROR: publishing on port %d\n", port);
-    exit(-1);
-  }
+  // if (ei_publish(&ec, port) == -1)
+  // {
+  //   fprintf(stderr, "ERROR: publishing on port %d\n", port);
+  //   exit(-1);
+  // }
 
   int fd;
   ErlConnect conn;               /* Connection data */
@@ -62,6 +62,7 @@ int main(int argc, char **argv)
     exit(-1);
   }
 
+  fprintf(stdout, "listening on port: %d\n\r", port);
   fprintf(stdout, "Connected to %s\n\r", conn.nodename);
 
   erlang_msg info;
