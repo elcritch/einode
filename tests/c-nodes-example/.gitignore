@@ -7,3 +7,7 @@ erl_crash.dump
 cserver_ei3
 cnode_ei_s2
 cnode_ei_s3
+cserver
+cclient
+cclient
+cserver2
