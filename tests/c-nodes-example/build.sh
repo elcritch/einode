@@ -4,8 +4,9 @@
 set -x
 set -e
 
-INCLUDE_DIR=/Users/elcritch/.asdf/installs/erlang/22.2.1//usr/include/
-LIB_DIR=/Users/elcritch/.asdf/installs/erlang/22.2.1//lib/erl_interface-3.13.1/lib
+ERTS=$( elixir ../erl_base.exs )
+INCLUDE_DIR=$ERTS/include
+LIB_DIR=$ERTS/lib
 
 gcc -o cserver \
 	-Wno-implicit-function-declaration \
