@@ -33,18 +33,6 @@ int main(int argc, char **argv)
 
   // char *epmd_argv[] = { "epmd", "-daemon", NULL };
 
-  struct in_addr addr; /* 32-bit IP number of host */
-  int port;            /* Listen port number */
-  int listen;          /* Listen socket */
-  int fd;              /* fd to Erlang node */
-  int efd;
-  int max_fd;
-  int n_bytes;
-  int nfds;
-  msg_struct outgoing;
-  int n = 0;       /*  */
-  ei_cnode ec;     /* C node information */
-  ErlConnect conn; /* Connection data */
 
   int loop = 1; /* Lopp flag */
   int got;      /* Result of receive */
@@ -55,14 +43,15 @@ int main(int argc, char **argv)
 
   register_handlers();
 
-  port = atoi(argv[1]);
+  int port = atoi(argv[1]);
   int sampling_port = atoi(argv[2]);
 
   ei_init();
 
   // Starting EPMD before starting node
-  int rc = spawn_epmd();
+  // int rc = spawn_epmd();
 
+  struct in_addr addr; /* 32-bit IP number of host */
   addr.s_addr = inet_addr("127.0.0.1");
 
   node_s sampling_info;
@@ -72,21 +61,18 @@ int main(int argc, char **argv)
   sampling_info.ip = "127.0.0.1";
   sampling_info.node_name = "sampling";
   sampling_info.port = sampling_port;
-  // if (ei_connect_xinit("localhost", "testc", "test@127.0.0.1",
-  //   &addr, "secretcookie", 0) == -1)
-  //     erl_err_quit("erl_connect_xinit");
+
   start_sampling(&sampling_info);
-  fd = start_socket(&ec, &addr, port, "cmd", "localhost", "127.0.0.1", "secretcookie");
+
+  ei_cnode ec;     /* C node information */
+  // ErlConnect conn; /* Connection data */
+  int fd = start_socket(&ec, &addr, port, "cmd", "localhost", "127.0.0.1", "secretcookie");
 
   // Initialize eventfd signaling
-  efd = eventfd(0, 0);
-  max_fd = efd;
-  // fd_set master;
-  // FD_ZERO(&master);
-  // safe_fd_set(efd, &master, &max_fd);
-  // safe_fd_set(fd, &master, &max_fd);
+  int efd = eventfd(0, 0);
+  int max_fd = efd;
 
-  n_bytes = sizeof(msg_struct);
+  int n_bytes = sizeof(msg_struct);
 
   struct epoll_event event, events[MAX_EVENTS];
 
@@ -109,7 +95,7 @@ int main(int argc, char **argv)
   while (loop)
   {
     fprintf(stderr, "Waiting for events!\n");
-    nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+    int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
     fprintf(stderr, "%d available events!\n", nfds);
     for (int n = 0; n < nfds; n++)
     {
@@ -164,13 +150,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "Available to write\n");
       }
     }
-    // outgoing.buff = malloc(sizeof(ei_x_buff));
-    // outgoing.recipient = malloc(sizeof(erlang_pid));
-    // read(efd, &outgoing, n_bytes);
-    // erlang_pid *to = outgoing.recipient;
-    // ei_x_buff *buff = outgoing.buff;
-    // ei_send(fd, to, buff->buff, buff->index);
-    // ei_x_free(buff);
 
-  } /* while */
+  }
 }

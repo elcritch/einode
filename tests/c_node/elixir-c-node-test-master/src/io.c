@@ -12,7 +12,6 @@
 #include "ei.h"
 #include "erl_test/io.h"
 
-
 pthread_mutex_t io_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
