@@ -35,3 +35,5 @@ gcc -o cclient \
 	complex.c cnode_c.c \
 	-lerl_interface -lei -lpthread
 
+nim c --d:debug cnode_ei_s3.nim
+
