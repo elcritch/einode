@@ -20,7 +20,7 @@
 
 import posix
 
-proc EI_HAVE_TIMEOUT(): cint {.importcpp: "EI_HAVE_TIMEOUT@".}
+proc EI_HAVE_TIMEOUT*(): cint {.importcpp: "EI_HAVE_TIMEOUT@".}
 
 ##  --------------------------------------------------------------------
 ##                       Defines part of API
@@ -32,15 +32,15 @@ proc EI_HAVE_TIMEOUT(): cint {.importcpp: "EI_HAVE_TIMEOUT@".}
 
 ##  FIXME just a few are documented, does it mean they can't be returned?
 
-proc ERL_ERROR(): cint {.importcpp: "ERL_ERROR@".}
-proc ERL_NO_DAEMON(): cint {.importcpp: "ERL_NO_DAEMON@".}
-proc ERL_NO_PORT(): cint {.importcpp: "ERL_NO_PORT@".}
-proc ERL_CONNECT_FAI(): cint {.importcpp: "ERL_CONNECT_FAI@".}
-proc ERL_TIMEOUT(): cint {.importcpp: "ERL_TIMEOUT@".}
-proc ERL_NO_REMOTE(): cint {.importcpp: "ERL_NO_REMOTE@".}
-proc ERL_TICK(): cint {.importcpp: "ERL_TICK@".}
-proc ERL_MSG(): cint {.importcpp: "ERL_MSG@".}
-proc ERL_NO_TIMEOUT(): cint {.importcpp: "ERL_NO_TIMEOUT@".}
+proc ERL_ERROR*(): cint {.importcpp: "ERL_ERROR@".}
+proc ERL_NO_DAEMON*(): cint {.importcpp: "ERL_NO_DAEMON@".}
+proc ERL_NO_PORT*(): cint {.importcpp: "ERL_NO_PORT@".}
+proc ERL_CONNECT_FAI*(): cint {.importcpp: "ERL_CONNECT_FAI@".}
+proc ERL_TIMEOUT*(): cint {.importcpp: "ERL_TIMEOUT@".}
+proc ERL_NO_REMOTE*(): cint {.importcpp: "ERL_NO_REMOTE@".}
+proc ERL_TICK*(): cint {.importcpp: "ERL_TICK@".}
+proc ERL_MSG*(): cint {.importcpp: "ERL_MSG@".}
+proc ERL_NO_TIMEOUT*(): cint {.importcpp: "ERL_NO_TIMEOUT@".}
 
 # const
 #   ERL_ERROR* = -1
@@ -55,15 +55,15 @@ proc ERL_NO_TIMEOUT(): cint {.importcpp: "ERL_NO_TIMEOUT@".}
 
 ##  these are the control message types
 
-proc ERL_LINK(): cint {.importcpp: "ERL_LINK@".}
-proc ERL_SEND(): cint {.importcpp: "ERL_SEND@".}
-proc ERL_EXIT(): cint {.importcpp: "ERL_EXIT@".}
-proc ERL_UNLINK(): cint {.importcpp: "ERL_UNLINK@".}
-proc ERL_NODE_LINK(): cint {.importcpp: "ERL_NODE_LINK@".}
-proc ERL_REG_SEND(): cint {.importcpp: "ERL_REG_SEND@".}
-proc ERL_GROUP_LEADER(): cint {.importcpp: "ERL_GROUP_LEADER@".}
-proc ERL_EXIT2(): cint {.importcpp: "ERL_EXIT2@".}
-proc ERL_PASS_THROUGH(): cint {.importcpp: "ERL_PASS_THROUGH@".}
+proc ERL_LINK*(): cint {.importcpp: "ERL_LINK@".}
+proc ERL_SEND*(): cint {.importcpp: "ERL_SEND@".}
+proc ERL_EXIT*(): cint {.importcpp: "ERL_EXIT@".}
+proc ERL_UNLINK*(): cint {.importcpp: "ERL_UNLINK@".}
+proc ERL_NODE_LINK*(): cint {.importcpp: "ERL_NODE_LINK@".}
+proc ERL_REG_SEND*(): cint {.importcpp: "ERL_REG_SEND@".}
+proc ERL_GROUP_LEADER*(): cint {.importcpp: "ERL_GROUP_LEADER@".}
+proc ERL_EXIT2*(): cint {.importcpp: "ERL_EXIT2@".}
+proc ERL_PASS_THROUGH*(): cint {.importcpp: "ERL_PASS_THROUGH@".}
 
 # const
 #   ERL_LINK* = 1
@@ -78,13 +78,13 @@ proc ERL_PASS_THROUGH(): cint {.importcpp: "ERL_PASS_THROUGH@".}
 
 ##  new ones for tracing, from Kenneth
 
-proc ERL_SEND_TT(): cint {.importcpp: "ERL_SEND_TT@".}
-proc ERL_EXIT_TT(): cint {.importcpp: "ERL_EXIT_TT@".}
-proc ERL_REG_SEND_TT(): cint {.importcpp: "ERL_REG_SEND_TT@".}
-proc ERL_EXIT2_TT(): cint {.importcpp: "ERL_EXIT2_TT@".}
-proc ERL_MONITOR_P(): cint {.importcpp: "ERL_MONITOR_P@".}
-proc ERL_DEMONITOR_P(): cint {.importcpp: "ERL_DEMONITOR_P@".}
-proc ERL_MONITOR_P_EXIT(): cint {.importcpp: "ERL_MONITOR_P_EXIT@".}
+proc ERL_SEND_TT*(): cint {.importcpp: "ERL_SEND_TT@".}
+proc ERL_EXIT_TT*(): cint {.importcpp: "ERL_EXIT_TT@".}
+proc ERL_REG_SEND_TT*(): cint {.importcpp: "ERL_REG_SEND_TT@".}
+proc ERL_EXIT2_TT*(): cint {.importcpp: "ERL_EXIT2_TT@".}
+proc ERL_MONITOR_P*(): cint {.importcpp: "ERL_MONITOR_P@".}
+proc ERL_DEMONITOR_P*(): cint {.importcpp: "ERL_DEMONITOR_P@".}
+proc ERL_MONITOR_P_EXIT*(): cint {.importcpp: "ERL_MONITOR_P_EXIT@".}
 
 # const
 #   ERL_SEND_TT* = 12
@@ -104,36 +104,36 @@ proc ERL_MONITOR_P_EXIT(): cint {.importcpp: "ERL_MONITOR_P_EXIT@".}
 ##
 ##  FIXME we don't want to export these.....
 
-proc ERL_SMALL_INTEGER_EXT(): cint {.importcpp: "ERL_SMALL_INTEGER_EXT@".}
-proc ERL_INTEGER_EXT(): cint {.importcpp: "ERL_INTEGER_EXT@".}
-proc ERL_FLOAT_EXT(): cint {.importcpp: "ERL_FLOAT_EXT@".}
-proc NEW_FLOAT_EXT(): cint {.importcpp: "NEW_FLOAT_EXT@".}
-proc ERL_ATOM_EXT(): cint {.importcpp: "ERL_ATOM_EXT@".}
-proc ERL_SMALL_ATOM_EXT(): cint {.importcpp: "ERL_SMALL_ATOM_EXT@".}
-proc ERL_ATOM_UTF8_EXT(): cint {.importcpp: "ERL_ATOM_UTF8_EXT@".}
-proc ERL_SMALL_ATOM_UTF8_EXT(): cint {.importcpp: "ERL_SMALL_ATOM_UTF8_EXT@".}
-proc ERL_REFERENCE_EXT(): cint {.importcpp: "ERL_REFERENCE_EXT@".}
-proc ERL_NEW_REFERENCE_EXT(): cint {.importcpp: "ERL_NEW_REFERENCE_EXT@".}
-proc ERL_NEWER_REFERENCE_EXT(): cint {.importcpp: "ERL_NEWER_REFERENCE_EXT@".}
-proc ERL_PORT_EXT(): cint {.importcpp: "ERL_PORT_EXT@".}
-proc ERL_NEW_PORT_EXT(): cint {.importcpp: "ERL_NEW_PORT_EXT@".}
-proc ERL_PID_EXT(): cint {.importcpp: "ERL_PID_EXT@".}
-proc ERL_NEW_PID_EXT(): cint {.importcpp: "ERL_NEW_PID_EXT@".}
-proc ERL_SMALL_TUPLE_EXT(): cint {.importcpp: "ERL_SMALL_TUPLE_EXT@".}
-proc ERL_LARGE_TUPLE_EXT(): cint {.importcpp: "ERL_LARGE_TUPLE_EXT@".}
-proc ERL_NIL_EXT(): cint {.importcpp: "ERL_NIL_EXT@".}
-proc ERL_STRING_EXT(): cint {.importcpp: "ERL_STRING_EXT@".}
-proc ERL_LIST_EXT(): cint {.importcpp: "ERL_LIST_EXT@".}
-proc ERL_BINARY_EXT(): cint {.importcpp: "ERL_BINARY_EXT@".}
-proc ERL_BIT_BINARY_EXT(): cint {.importcpp: "ERL_BIT_BINARY_EXT@".}
-proc ERL_SMALL_BIG_EXT(): cint {.importcpp: "ERL_SMALL_BIG_EXT@".}
-proc ERL_LARGE_BIG_EXT(): cint {.importcpp: "ERL_LARGE_BIG_EXT@".}
-proc ERL_NEW_FUN_EXT(): cint {.importcpp: "ERL_NEW_FUN_EXT@".}
-proc ERL_MAP_EXT(): cint {.importcpp: "ERL_MAP_EXT@".}
-proc ERL_FUN_EXT(): cint {.importcpp: "ERL_FUN_EXT@".}
-proc ERL_EXPORT_EXT(): cint {.importcpp: "ERL_EXPORT_EXT@".}
-proc ERL_NEW_CACHE(): cint {.importcpp: "ERL_NEW_CACHE@".}
-proc ERL_CACHED_ATOM(): cint {.importcpp: "ERL_CACHED_ATOM@".}
+proc ERL_SMALL_INTEGER_EXT*(): cint {.importcpp: "ERL_SMALL_INTEGER_EXT@".}
+proc ERL_INTEGER_EXT*(): cint {.importcpp: "ERL_INTEGER_EXT@".}
+proc ERL_FLOAT_EXT*(): cint {.importcpp: "ERL_FLOAT_EXT@".}
+proc NEW_FLOAT_EXT*(): cint {.importcpp: "NEW_FLOAT_EXT@".}
+proc ERL_ATOM_EXT*(): cint {.importcpp: "ERL_ATOM_EXT@".}
+proc ERL_SMALL_ATOM_EXT*(): cint {.importcpp: "ERL_SMALL_ATOM_EXT@".}
+proc ERL_ATOM_UTF8_EXT*(): cint {.importcpp: "ERL_ATOM_UTF8_EXT@".}
+proc ERL_SMALL_ATOM_UTF8_EXT*(): cint {.importcpp: "ERL_SMALL_ATOM_UTF8_EXT@".}
+proc ERL_REFERENCE_EXT*(): cint {.importcpp: "ERL_REFERENCE_EXT@".}
+proc ERL_NEW_REFERENCE_EXT*(): cint {.importcpp: "ERL_NEW_REFERENCE_EXT@".}
+proc ERL_NEWER_REFERENCE_EXT*(): cint {.importcpp: "ERL_NEWER_REFERENCE_EXT@".}
+proc ERL_PORT_EXT*(): cint {.importcpp: "ERL_PORT_EXT@".}
+proc ERL_NEW_PORT_EXT*(): cint {.importcpp: "ERL_NEW_PORT_EXT@".}
+proc ERL_PID_EXT*(): cint {.importcpp: "ERL_PID_EXT@".}
+proc ERL_NEW_PID_EXT*(): cint {.importcpp: "ERL_NEW_PID_EXT@".}
+proc ERL_SMALL_TUPLE_EXT*(): cint {.importcpp: "ERL_SMALL_TUPLE_EXT@".}
+proc ERL_LARGE_TUPLE_EXT*(): cint {.importcpp: "ERL_LARGE_TUPLE_EXT@".}
+proc ERL_NIL_EXT*(): cint {.importcpp: "ERL_NIL_EXT@".}
+proc ERL_STRING_EXT*(): cint {.importcpp: "ERL_STRING_EXT@".}
+proc ERL_LIST_EXT*(): cint {.importcpp: "ERL_LIST_EXT@".}
+proc ERL_BINARY_EXT*(): cint {.importcpp: "ERL_BINARY_EXT@".}
+proc ERL_BIT_BINARY_EXT*(): cint {.importcpp: "ERL_BIT_BINARY_EXT@".}
+proc ERL_SMALL_BIG_EXT*(): cint {.importcpp: "ERL_SMALL_BIG_EXT@".}
+proc ERL_LARGE_BIG_EXT*(): cint {.importcpp: "ERL_LARGE_BIG_EXT@".}
+proc ERL_NEW_FUN_EXT*(): cint {.importcpp: "ERL_NEW_FUN_EXT@".}
+proc ERL_MAP_EXT*(): cint {.importcpp: "ERL_MAP_EXT@".}
+proc ERL_FUN_EXT*(): cint {.importcpp: "ERL_FUN_EXT@".}
+proc ERL_EXPORT_EXT*(): cint {.importcpp: "ERL_EXPORT_EXT@".}
+proc ERL_NEW_CACHE*(): cint {.importcpp: "ERL_NEW_CACHE@".}
+proc ERL_CACHED_ATOM*(): cint {.importcpp: "ERL_CACHED_ATOM@".}
 
 # const
 #   ERL_SMALL_INTEGER_EXT* = 'a'
@@ -175,12 +175,12 @@ proc ERL_CACHED_ATOM(): cint {.importcpp: "ERL_CACHED_ATOM@".}
 ##  library and when using the library we set a value that we use
 ##
 
-# proc EI_MAX_COOKIE_SIZE(): cint {.importcpp: "EI_MAX_COOKIE_SIZE@".}
-# proc MAXATOMLEN(): cint {.importcpp: "MAXATOMLEN@".}
-# proc MAXATOMLEN_UTF8(): cint {.importcpp: "MAXATOMLEN_UTF8@".}
-# proc EI_MAXHOSTNAMELEN(): cint {.importcpp: "EI_MAXHOSTNAMELEN@".}
-# proc EI_MAXALIVELEN(): cint {.importcpp: "EI_MAXALIVELEN@".}
-# proc MAXNODELEN(): cint {.importcpp: "MAXNODELEN@".}
+# proc EI_MAX_COOKIE_SIZE*(): cint {.importcpp: "EI_MAX_COOKIE_SIZE@".}
+# proc MAXATOMLEN*(): cint {.importcpp: "MAXATOMLEN@".}
+# proc MAXATOMLEN_UTF8*(): cint {.importcpp: "MAXATOMLEN_UTF8@".}
+# proc EI_MAXHOSTNAMELEN*(): cint {.importcpp: "EI_MAXHOSTNAMELEN@".}
+# proc EI_MAXALIVELEN*(): cint {.importcpp: "EI_MAXALIVELEN@".}
+# proc MAXNODELEN*(): cint {.importcpp: "MAXNODELEN@".}
 
 const
   EI_MAX_COOKIE_SIZE* = 512
@@ -356,7 +356,7 @@ type
 ##  A dynamic version of ei XX
 
 type
-  ei_x_buff* {.importc: "ei_x_buff", header: "ei.h", bycopy.} = object
+  EiBuff* {.importc: "ei_x_buff", header: "ei.h", bycopy.} = object
     buff* {.importc: "buff".}: cstring
     buffsz* {.importc: "buffsz".}: cint
     index* {.importc: "index".}: cint
@@ -396,13 +396,13 @@ proc ei_receive*(fd: cint; bufp: ptr cuchar; bufsize: cint): cint {.cdecl,
     importc: "ei_receive", header: "ei.h".}
 proc ei_receive_tmo*(fd: cint; bufp: ptr cuchar; bufsize: cint; ms: cuint): cint {.cdecl,
     importc: "ei_receive_tmo", header: "ei.h".}
-proc ei_receive_msg*(fd: cint; msg: ptr ErlangMsg; x: ptr ei_x_buff): cint {.cdecl,
+proc ei_receive_msg*(fd: cint; msg: ptr ErlangMsg; x: ptr EiBuff): cint {.cdecl,
     importc: "ei_receive_msg", header: "ei.h".}
-proc ei_receive_msg_tmo*(fd: cint; msg: ptr ErlangMsg; x: ptr ei_x_buff; ms: cuint): cint {.
+proc ei_receive_msg_tmo*(fd: cint; msg: ptr ErlangMsg; x: ptr EiBuff; ms: cuint): cint {.
     cdecl, importc: "ei_receive_msg_tmo", header: "ei.h".}
-proc ei_xreceive_msg*(fd: cint; msg: ptr ErlangMsg; x: ptr ei_x_buff): cint {.cdecl,
+proc ei_xreceive_msg*(fd: cint; msg: ptr ErlangMsg; x: ptr EiBuff): cint {.cdecl,
     importc: "ei_xreceive_msg", header: "ei.h".}
-proc ei_xreceive_msg_tmo*(fd: cint; msg: ptr ErlangMsg; x: ptr ei_x_buff; ms: cuint): cint {.
+proc ei_xreceive_msg_tmo*(fd: cint; msg: ptr ErlangMsg; x: ptr EiBuff; ms: cuint): cint {.
     cdecl, importc: "ei_xreceive_msg_tmo", header: "ei.h".}
 proc ei_send*(fd: cint; to: ptr ErlangPid; buf: cstring; len: cint): cint {.cdecl,
     importc: "ei_send", header: "ei.h".}
@@ -414,12 +414,12 @@ proc ei_reg_send_tmo*(ec: ptr EiCnode; fd: cint; server_name: cstring; buf: cstr
                      len: cint; ms: cuint): cint {.cdecl, importc: "ei_reg_send_tmo",
     header: "ei.h".}
 proc ei_rpc*(ec: ptr EiCnode; fd: cint; `mod`: cstring; fun: cstring; inbuf: cstring;
-            inbuflen: cint; x: ptr ei_x_buff): cint {.cdecl, importc: "ei_rpc",
+            inbuflen: cint; x: ptr EiBuff): cint {.cdecl, importc: "ei_rpc",
     header: "ei.h".}
 proc ei_rpc_to*(ec: ptr EiCnode; fd: cint; `mod`: cstring; fun: cstring; buf: cstring;
                len: cint): cint {.cdecl, importc: "ei_rpc_to", header: "ei.h".}
 proc ei_rpc_from*(ec: ptr EiCnode; fd: cint; timeout: cint; msg: ptr ErlangMsg;
-                 x: ptr ei_x_buff): cint {.cdecl, importc: "ei_rpc_from",
+                 x: ptr EiBuff): cint {.cdecl, importc: "ei_rpc_from",
                                        header: "ei.h".}
 proc ei_publish*(ec: ptr EiCnode; port: cint): cint {.cdecl, importc: "ei_publish",
     header: "ei.h".}
@@ -504,35 +504,35 @@ proc ei_gethostbyaddr_r*(`addr`: cstring; length: cint; `type`: cint;
 
 proc ei_encode_version*(buf: cstring; index: ptr cint): cint {.cdecl,
     importc: "ei_encode_version", header: "ei.h".}
-proc ei_x_encode_version*(x: ptr ei_x_buff): cint {.cdecl,
+proc ei_x_encode_version*(x: ptr EiBuff): cint {.cdecl,
     importc: "ei_x_encode_version", header: "ei.h".}
 proc ei_encode_long*(buf: cstring; index: ptr cint; p: clong): cint {.cdecl,
     importc: "ei_encode_long", header: "ei.h".}
-proc ei_x_encode_long*(x: ptr ei_x_buff; n: clong): cint {.cdecl,
+proc ei_x_encode_long*(x: ptr EiBuff; n: clong): cint {.cdecl,
     importc: "ei_x_encode_long", header: "ei.h".}
 proc ei_encode_ulong*(buf: cstring; index: ptr cint; p: culong): cint {.cdecl,
     importc: "ei_encode_ulong", header: "ei.h".}
-proc ei_x_encode_ulong*(x: ptr ei_x_buff; n: culong): cint {.cdecl,
+proc ei_x_encode_ulong*(x: ptr EiBuff; n: culong): cint {.cdecl,
     importc: "ei_x_encode_ulong", header: "ei.h".}
 proc ei_encode_double*(buf: cstring; index: ptr cint; p: cdouble): cint {.cdecl,
     importc: "ei_encode_double", header: "ei.h".}
-proc ei_x_encode_double*(x: ptr ei_x_buff; dbl: cdouble): cint {.cdecl,
+proc ei_x_encode_double*(x: ptr EiBuff; dbl: cdouble): cint {.cdecl,
     importc: "ei_x_encode_double", header: "ei.h".}
 proc ei_encode_boolean*(buf: cstring; index: ptr cint; p: cint): cint {.cdecl,
     importc: "ei_encode_boolean", header: "ei.h".}
-proc ei_x_encode_boolean*(x: ptr ei_x_buff; p: cint): cint {.cdecl,
+proc ei_x_encode_boolean*(x: ptr EiBuff; p: cint): cint {.cdecl,
     importc: "ei_x_encode_boolean", header: "ei.h".}
 proc ei_encode_char*(buf: cstring; index: ptr cint; p: char): cint {.cdecl,
     importc: "ei_encode_char", header: "ei.h".}
-proc ei_x_encode_char*(x: ptr ei_x_buff; p: char): cint {.cdecl,
+proc ei_x_encode_char*(x: ptr EiBuff; p: char): cint {.cdecl,
     importc: "ei_x_encode_char", header: "ei.h".}
 proc ei_encode_string*(buf: cstring; index: ptr cint; p: cstring): cint {.cdecl,
     importc: "ei_encode_string", header: "ei.h".}
 proc ei_encode_string_len*(buf: cstring; index: ptr cint; p: cstring; len: cint): cint {.
     cdecl, importc: "ei_encode_string_len", header: "ei.h".}
-proc ei_x_encode_string*(x: ptr ei_x_buff; s: cstring): cint {.cdecl,
+proc ei_x_encode_string*(x: ptr EiBuff; s: cstring): cint {.cdecl,
     importc: "ei_x_encode_string", header: "ei.h".}
-proc ei_x_encode_string_len*(x: ptr ei_x_buff; s: cstring; len: cint): cint {.cdecl,
+proc ei_x_encode_string_len*(x: ptr EiBuff; s: cstring; len: cint): cint {.cdecl,
     importc: "ei_x_encode_string_len", header: "ei.h".}
 proc ei_encode_atom*(buf: cstring; index: ptr cint; p: cstring): cint {.cdecl,
     importc: "ei_encode_atom", header: "ei.h".}
@@ -544,14 +544,14 @@ proc ei_encode_atom_len*(buf: cstring; index: ptr cint; p: cstring; len: cint): 
 proc ei_encode_atom_len_as*(buf: cstring; index: ptr cint; p: cstring; len: cint;
                            `from`: erlang_char_encoding; to: erlang_char_encoding): cint {.
     cdecl, importc: "ei_encode_atom_len_as", header: "ei.h".}
-proc ei_x_encode_atom*(x: ptr ei_x_buff; s: cstring): cint {.cdecl,
+proc ei_x_encode_atom*(x: ptr EiBuff; s: cstring): cint {.cdecl,
     importc: "ei_x_encode_atom", header: "ei.h".}
-proc ei_x_encode_atom_as*(x: ptr ei_x_buff; s: cstring; `from`: erlang_char_encoding;
+proc ei_x_encode_atom_as*(x: ptr EiBuff; s: cstring; `from`: erlang_char_encoding;
                          to: erlang_char_encoding): cint {.cdecl,
     importc: "ei_x_encode_atom_as", header: "ei.h".}
-proc ei_x_encode_atom_len*(x: ptr ei_x_buff; s: cstring; len: cint): cint {.cdecl,
+proc ei_x_encode_atom_len*(x: ptr EiBuff; s: cstring; len: cint): cint {.cdecl,
     importc: "ei_x_encode_atom_len", header: "ei.h".}
-proc ei_x_encode_atom_len_as*(x: ptr ei_x_buff; s: cstring; len: cint;
+proc ei_x_encode_atom_len_as*(x: ptr EiBuff; s: cstring; len: cint;
                              `from`: erlang_char_encoding;
                              to: erlang_char_encoding): cint {.cdecl,
     importc: "ei_x_encode_atom_len_as", header: "ei.h".}
@@ -560,49 +560,49 @@ proc ei_encode_binary*(buf: cstring; index: ptr cint; p: pointer; len: clong): c
 proc ei_encode_bitstring*(buf: cstring; index: ptr cint; p: cstring; bitoffs: csize;
                          bits: csize): cint {.cdecl, importc: "ei_encode_bitstring",
     header: "ei.h".}
-proc ei_x_encode_binary*(x: ptr ei_x_buff; s: pointer; len: cint): cint {.cdecl,
+proc ei_x_encode_binary*(x: ptr EiBuff; s: pointer; len: cint): cint {.cdecl,
     importc: "ei_x_encode_binary", header: "ei.h".}
-proc ei_x_encode_bitstring*(x: ptr ei_x_buff; p: cstring; bitoffs: csize; bits: csize): cint {.
+proc ei_x_encode_bitstring*(x: ptr EiBuff; p: cstring; bitoffs: csize; bits: csize): cint {.
     cdecl, importc: "ei_x_encode_bitstring", header: "ei.h".}
 proc ei_encode_pid*(buf: cstring; index: ptr cint; p: ptr ErlangPid): cint {.cdecl,
     importc: "ei_encode_pid", header: "ei.h".}
-proc ei_x_encode_pid*(x: ptr ei_x_buff; pid: ptr ErlangPid): cint {.cdecl,
+proc ei_x_encode_pid*(x: ptr EiBuff; pid: ptr ErlangPid): cint {.cdecl,
     importc: "ei_x_encode_pid", header: "ei.h".}
 proc ei_encode_fun*(buf: cstring; index: ptr cint; p: ptr erlang_fun): cint {.cdecl,
     importc: "ei_encode_fun", header: "ei.h".}
-proc ei_x_encode_fun*(x: ptr ei_x_buff; fun: ptr erlang_fun): cint {.cdecl,
+proc ei_x_encode_fun*(x: ptr EiBuff; fun: ptr erlang_fun): cint {.cdecl,
     importc: "ei_x_encode_fun", header: "ei.h".}
 proc ei_encode_port*(buf: cstring; index: ptr cint; p: ptr ErlangPort): cint {.cdecl,
     importc: "ei_encode_port", header: "ei.h".}
-proc ei_x_encode_port*(x: ptr ei_x_buff; p: ptr ErlangPort): cint {.cdecl,
+proc ei_x_encode_port*(x: ptr EiBuff; p: ptr ErlangPort): cint {.cdecl,
     importc: "ei_x_encode_port", header: "ei.h".}
 proc ei_encode_ref*(buf: cstring; index: ptr cint; p: ptr ErlangRef): cint {.cdecl,
     importc: "ei_encode_ref", header: "ei.h".}
-proc ei_x_encode_ref*(x: ptr ei_x_buff; p: ptr ErlangRef): cint {.cdecl,
+proc ei_x_encode_ref*(x: ptr EiBuff; p: ptr ErlangRef): cint {.cdecl,
     importc: "ei_x_encode_ref", header: "ei.h".}
 ##  int ei_encode_term(char *buf, int *index, void *t) EI_DEPRECATED_ATTR;
 ##  int ei_x_encode_term(ei_x_buff* x, void* t) EI_DEPRECATED_ATTR;
 
 proc ei_encode_trace*(buf: cstring; index: ptr cint; p: ptr ErlangTrace): cint {.cdecl,
     importc: "ei_encode_trace", header: "ei.h".}
-proc ei_x_encode_trace*(x: ptr ei_x_buff; p: ptr ErlangTrace): cint {.cdecl,
+proc ei_x_encode_trace*(x: ptr EiBuff; p: ptr ErlangTrace): cint {.cdecl,
     importc: "ei_x_encode_trace", header: "ei.h".}
 proc ei_encode_tuple_header*(buf: cstring; index: ptr cint; arity: cint): cint {.cdecl,
     importc: "ei_encode_tuple_header", header: "ei.h".}
-proc ei_x_encode_tuple_header*(x: ptr ei_x_buff; n: clong): cint {.cdecl,
+proc ei_x_encode_tuple_header*(x: ptr EiBuff; n: clong): cint {.cdecl,
     importc: "ei_x_encode_tuple_header", header: "ei.h".}
 proc ei_encode_list_header*(buf: cstring; index: ptr cint; arity: cint): cint {.cdecl,
     importc: "ei_encode_list_header", header: "ei.h".}
-proc ei_x_encode_list_header*(x: ptr ei_x_buff; n: clong): cint {.cdecl,
+proc ei_x_encode_list_header*(x: ptr EiBuff; n: clong): cint {.cdecl,
     importc: "ei_x_encode_list_header", header: "ei.h".}
 template ei_encode_empty_list*(buf, i: untyped): untyped =
   ei_encode_list_header(buf, i, 0)
 
-proc ei_x_encode_empty_list*(x: ptr ei_x_buff): cint {.cdecl,
+proc ei_x_encode_empty_list*(x: ptr EiBuff): cint {.cdecl,
     importc: "ei_x_encode_empty_list", header: "ei.h".}
 proc ei_encode_map_header*(buf: cstring; index: ptr cint; arity: cint): cint {.cdecl,
     importc: "ei_encode_map_header", header: "ei.h".}
-proc ei_x_encode_map_header*(x: ptr ei_x_buff; n: clong): cint {.cdecl,
+proc ei_x_encode_map_header*(x: ptr EiBuff; n: clong): cint {.cdecl,
     importc: "ei_x_encode_map_header", header: "ei.h".}
 ##
 ##  ei_get_type() returns the type and "size" of the item at
@@ -687,17 +687,17 @@ proc ei_s_print_term*(s: cstringArray; buf: cstring; index: ptr cint): cint {.cd
 ##  format to build binary format terms a bit like printf
 ##
 
-proc ei_x_format*(x: ptr ei_x_buff; fmt: cstring): cint {.varargs, cdecl,
+proc ei_x_format*(x: ptr EiBuff; fmt: cstring): cint {.varargs, cdecl,
     importc: "ei_x_format", header: "ei.h".}
-proc ei_x_format_wo_ver*(x: ptr ei_x_buff; fmt: cstring): cint {.varargs, cdecl,
+proc ei_x_format_wo_ver*(x: ptr EiBuff; fmt: cstring): cint {.varargs, cdecl,
     importc: "ei_x_format_wo_ver", header: "ei.h".}
-proc ei_x_new*(x: ptr ei_x_buff): cint {.cdecl, importc: "ei_x_new", header: "ei.h".}
-proc ei_x_new_with_version*(x: ptr ei_x_buff): cint {.cdecl,
+proc ei_x_new*(x: ptr EiBuff): cint {.cdecl, importc: "ei_x_new", header: "ei.h".}
+proc ei_x_new_with_version*(x: ptr EiBuff): cint {.cdecl,
     importc: "ei_x_new_with_version", header: "ei.h".}
-proc ei_x_free*(x: ptr ei_x_buff): cint {.cdecl, importc: "ei_x_free", header: "ei.h".}
-proc ei_x_append*(x: ptr ei_x_buff; x2: ptr ei_x_buff): cint {.cdecl,
+proc ei_x_free*(x: ptr EiBuff): cint {.cdecl, importc: "ei_x_free", header: "ei.h".}
+proc ei_x_append*(x: ptr EiBuff; x2: ptr EiBuff): cint {.cdecl,
     importc: "ei_x_append", header: "ei.h".}
-proc ei_x_append_buf*(x: ptr ei_x_buff; buf: cstring; len: cint): cint {.cdecl,
+proc ei_x_append_buf*(x: ptr EiBuff; buf: cstring; len: cint): cint {.cdecl,
     importc: "ei_x_append_buf", header: "ei.h".}
 proc ei_skip_term*(buf: cstring; index: ptr cint): cint {.cdecl,
     importc: "ei_skip_term", header: "ei.h".}
@@ -879,12 +879,12 @@ proc ei_reg_delete*(reg: ptr EiReg; key: cstring): cint {.cdecl,
     importc: "ei_reg_delete", header: "ei.h".}
 ##  get information about an object
 
-proc EiRegStat*(reg: ptr EiReg; key: cstring; obuf: ptr EiRegStat): cint {.cdecl,
-    importc: "EiRegStat", header: "ei.h".}
+proc ei_reg_stat*(reg: ptr EiReg; key: cstring; obuf: ptr EiRegStat): cint {.cdecl,
+    importc: "ei_reg_stat", header: "ei.h".}
 ##  get information about table
 
-proc EiRegTabstat*(reg: ptr EiReg; obuf: ptr EiRegTabstat): cint {.cdecl,
-    importc: "EiRegTabstat", header: "ei.h".}
+proc ei_reg_tabstat*(reg: ptr EiReg; obuf: ptr EiRegTabstat): cint {.cdecl,
+    importc: "ei_reg_tabstat", header: "ei.h".}
 ##  dump to / restore from backup
 ##  fd is open descriptor to Erlang, mntab is Mnesia table name
 ##  flags here:
@@ -899,19 +899,22 @@ proc ei_reg_restore*(fd: cint; reg: ptr EiReg; mntab: cstring): cint {.cdecl,
     importc: "ei_reg_restore", header: "ei.h".}
 proc ei_reg_purge*(reg: ptr EiReg): cint {.cdecl, importc: "ei_reg_purge",
                                        header: "ei.h".}
-##  --------------------------------------------------------------------
-##             Encoding/decoding bugnums to GNU MP format
-##  --------------------------------------------------------------------
-##  If the user included <gmp.h> we supply some more functions
 
-when defined(__GNU_MP_VERSION) and __GNU_MP_VERSION == 4 and
-    __GNU_MP_VERSION_MINOR >= 1:
-  proc ei_decode_bignum*(buf: cstring; index: ptr cint; obj: mpz_t): cint {.cdecl,
-      importc: "ei_decode_bignum", header: "ei.h".}
-  proc ei_encode_bignum*(buf: cstring; index: ptr cint; obj: mpz_t): cint {.cdecl,
-      importc: "ei_encode_bignum", header: "ei.h".}
-  proc ei_x_encode_bignum*(x: ptr ei_x_buff; obj: mpz_t): cint {.cdecl,
-      importc: "ei_x_encode_bignum", header: "ei.h".}
+# TODO: Ignore for now, would need to import gmp to Nim as well 
+# ##  --------------------------------------------------------------------
+# ##             Encoding/decoding bugnums to GNU MP format
+# ##  --------------------------------------------------------------------
+# ##  If the user included <gmp.h> we supply some more functions
+
+# when defined(__GNU_MP_VERSION) and __GNU_MP_VERSION == 4 and
+#     __GNU_MP_VERSION_MINOR >= 1:
+#   proc ei_decode_bignum*(buf: cstring; index: ptr cint; obj: mpz_t): cint {.cdecl,
+#       importc: "ei_decode_bignum", header: "ei.h".}
+#   proc ei_encode_bignum*(buf: cstring; index: ptr cint; obj: mpz_t): cint {.cdecl,
+#       importc: "ei_encode_bignum", header: "ei.h".}
+#   proc ei_x_encode_bignum*(x: ptr EiBuff; obj: mpz_t): cint {.cdecl,
+#       importc: "ei_x_encode_bignum", header: "ei.h".}
+
 ##  --------------------------------------------------------------------
 ##             Function definitions not documented FIXME
 ##  --------------------------------------------------------------------
@@ -928,7 +931,7 @@ proc ei_encode_longlong*(buf: cstring; index: ptr cint; p: clonglong): cint {.cd
     importc: "ei_encode_longlong", header: "ei.h".}
 proc ei_encode_ulonglong*(buf: cstring; index: ptr cint; p: culonglong): cint {.cdecl,
     importc: "ei_encode_ulonglong", header: "ei.h".}
-proc ei_x_encode_longlong*(x: ptr ei_x_buff; n: clonglong): cint {.cdecl,
+proc ei_x_encode_longlong*(x: ptr EiBuff; n: clonglong): cint {.cdecl,
     importc: "ei_x_encode_longlong", header: "ei.h".}
-proc ei_x_encode_ulonglong*(x: ptr ei_x_buff; n: culonglong): cint {.cdecl,
+proc ei_x_encode_ulonglong*(x: ptr EiBuff; n: culonglong): cint {.cdecl,
     importc: "ei_x_encode_ulonglong", header: "ei.h".}
