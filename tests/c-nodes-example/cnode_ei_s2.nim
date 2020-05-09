@@ -1,4 +1,8 @@
 ##  #include <erl_format.h>
+import strutils
+import sugar 
+
+import erts_include/ei 
 
 const
   BUFSIZE* = 1000
@@ -8,7 +12,8 @@ proc set_node_reply*(x_out: ptr ei_x_buff; val: clong)
 proc ei_malloc*(size: clong): pointer
 
 proc main*(argc: cint; argv: cstringArray): cint =
-  var port: cint = atoi(argv[1])
+  let arguments = commandLineParams()
+  var port: cint = argv[1].parseInt
   ei_init()
   var `addr`: in_addr
   ##  32-bit IP number of host
