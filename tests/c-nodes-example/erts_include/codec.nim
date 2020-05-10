@@ -97,7 +97,7 @@ type
       efun*: ErlFun
     # Composite
     of EMap:
-      fields*: OrderedTable[string, ErlTerm]
+      fields*: OrderedTable[ErlTerm, ErlTerm]
     of ETuple0:
       tpl0*: tuple[]
     of ETuple1:
@@ -118,10 +118,6 @@ type
       elems*: seq[ErlTerm]
     of ECharList:
       chars*: seq[char]
-
-proc newETerm*(b: nil): ErlTerm =
-  ## Creates a new `EBool ErlTerm`.
-  result = ErlTerm(kind: EBool, bval: b)
 
 proc newETerm*(s: bool): ErlTerm =
   ## Creates a new `EString ErlTerm`.
@@ -159,7 +155,15 @@ proc newETerm*(s: seq[char]): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EBinary, bin: s)
 
-proc nilETerm*(): ErlTerm =
+proc newEList*(): ErlTerm =
+  ## Creates a new `JObject JsonNode`
+  result = ErlTerm(kind: EList, elems: @[])
+
+proc newEMap*(): ErlTerm =
+  ## Creates a new `JObject JsonNode`
+  result = ErlTerm(kind: EMap, fields: initOrderedTable[ErlTerm, ErlTerm](4))
+
+proc newENil*(): ErlTerm =
   ## Creates a new `ENil ErlTerm`.
   result = ErlTerm(kind: ENil)
 
@@ -248,8 +252,8 @@ proc getFun*(n: ErlTerm): Option[ErlFun] =
   else: return some(n.efun)
 
 proc getFields*(n: ErlTerm,
-    default = initOrderedTable[string, ErlTerm](4)):
-        OrderedTable[string, ErlTerm] =
+    default = initOrderedTable[ErlTerm, ErlTerm](4)):
+        OrderedTable[ErlTerm, ErlTerm] =
   ## Retrieves the key, value pairs of a `JObject JsonNode`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JObject``, or if ``n`` is nil.
@@ -277,6 +281,59 @@ proc add*(obj: ErlTerm, key: string, val: ErlTerm) =
 proc `%`*[T](v: T): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = newETerm(v)
+
+proc `[]=`*(obj: ErlTerm, key: string, val: ErlTerm) {.inline.} =
+  ## Sets a field from a `JObject`.
+  assert(obj.kind == EMap)
+  obj.fields[key] = val
+
+proc `%`*[T: object](o: T): ErlTerm =
+  ## Construct JsonNode from tuples and objects.
+  result = newETerm()
+  for k, v in o.fieldPairs: result[k] = %v
+
+proc `%`*(o: ref object): ErlTerm =
+  ## Generic constructor for JSON data. Creates a new `JObject JsonNode`
+  if o.isNil:
+    result = newENil()
+  else:
+    result = %(o[])
+
+proc `%`*(o: enum): ErlTerm =
+  ## Construct a JsonNode that represents the specified enum value as a
+  ## string. Creates a new ``JString JsonNode``.
+  result = %($o)
+
+proc toJson(x: NimNode): NimNode {.compileTime.} =
+  case x.kind
+  of nnkBracket: # array
+    if x.len == 0: return newCall(bindSym"newJArray")
+    result = newNimNode(nnkBracket)
+    for i in 0 ..< x.len:
+      result.add(toJson(x[i]))
+    result = newCall(bindSym("%", brOpen), result)
+  of nnkTableConstr: # object
+    if x.len == 0: return newCall(bindSym"newJObject")
+    result = newNimNode(nnkTableConstr)
+    for i in 0 ..< x.len:
+      x[i].expectKind nnkExprColonExpr
+      result.add newTree(nnkExprColonExpr, x[i][0], toJson(x[i][1]))
+    result = newCall(bindSym("%", brOpen), result)
+  of nnkCurly: # empty object
+    x.expectLen(0)
+    result = newCall(bindSym"newJObject")
+  of nnkNilLit:
+    result = newCall(bindSym"newJNull")
+  of nnkPar:
+    if x.len == 1: result = toJson(x[0])
+    else: result = newCall(bindSym("%", brOpen), x)
+  else:
+    result = newCall(bindSym("%", brOpen), x)
+
+macro `%*`*(x: untyped): untyped =
+  ## Convert an expression to a JsonNode directly, without having to specify
+  ## `%` for every element.
+  result = toJson(x)
 
 
 
