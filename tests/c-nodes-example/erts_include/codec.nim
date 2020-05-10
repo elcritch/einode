@@ -114,6 +114,14 @@ proc newETerm*(n: int64): ErlTerm =
   ## Creates a new `EInt ErlTerm`.
   result = ErlTerm(kind: EInt64, n64: n)
 
+proc newETerm*(n: uint32): ErlTerm =
+  ## Creates a new `EInt ErlTerm`.
+  result = ErlTerm(kind: EUInt32, u32: n)
+
+proc newETerm*(n: uint64): ErlTerm =
+  ## Creates a new `EInt ErlTerm`.
+  result = ErlTerm(kind: EUInt64, u64: n)
+
 proc newETerm*(n: float32): ErlTerm =
   ## Creates a new `EFloat ErlTerm`.
   result = ErlTerm(kind: EFloat32, f32: n)
@@ -141,6 +149,10 @@ proc newETerm*(s: string): ErlTerm =
 proc newETerm*(s: seq[char]): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EBinary, bin: s)
+
+proc newETuple*(): ErlTerm =
+  ## Creates a new `JObject ErlTerm`
+  result = ErlTerm(kind: ETupleN, items: @[])
 
 proc newEList*(): ErlTerm =
   ## Creates a new `JObject ErlTerm`
@@ -403,6 +415,10 @@ proc `==`*(a, b: ErlTerm): bool =
       result = a.n32 == b.n32
     of EInt64:
       result = a.n64 == b.n64
+    of EUInt32:
+      result = a.u32 == b.u32
+    of EUInt64:
+      result = a.u64 == b.u64
     of EFloat32:
       result = a.f32 == b.f32
     of EFloat64:
@@ -413,12 +429,16 @@ proc `==`*(a, b: ErlTerm): bool =
       result = a.bin == b.bin
     of EBitBinary:
       result = a.bit == b.bit
+    of EAtom:
+      result = a.atm == b.atm
     of EPid:
       result = a.epid == b.epid
     of ERef:
       result = a.eref == b.eref
     of EFun:
       result = a.efun == b.efun
+    of ETupleN:
+      result = a.items == b.items
     of EList:
       result = a.elems == b.elems
     of ECharList:
@@ -446,7 +466,7 @@ proc `[]`*(node: ErlTerm, name: ErlTerm): ErlTerm {.inline.} =
   ## Gets a field from a `JObject`, which must not be nil.
   ## If the value at `name` does not exist, raises KeyError.
   assert(not isNil(node))
-  assert(node.kind == JObject)
+  assert(node.kind == EMap)
   when defined(nimErlGet):
     if not node.fields.hasKey(name): return nil
   result = node.fields[name]
@@ -456,7 +476,7 @@ proc `[]`*(node: ErlTerm, index: int): ErlTerm {.inline.} =
   ## is out of bounds, but as long as array bound checks are enabled it will
   ## result in an exception.
   assert(not isNil(node))
-  assert(node.kind == JArray)
+  assert(node.kind == EList)
   return node.elems[index]
 
 proc hasKey*(node: ErlTerm, key: ErlTerm): bool =
@@ -522,7 +542,7 @@ proc `{}=`*(node: ErlTerm, keys: varargs[ErlTerm], value: ErlTerm) =
     node = node[keys[i]]
   node[keys[keys.len-1]] = value
 
-proc delete*(obj: ErlTerm, key: string) =
+proc delete*(obj: ErlTerm, key: ErlTerm) =
   ## Deletes ``obj[key]``.
   assert(obj.kind == EMap)
   if not obj.fields.hasKey(key):
@@ -533,40 +553,49 @@ proc copy*(p: ErlTerm): ErlTerm =
   ## Performs a deep copy of `a`.
   case p.kind
   of ENil:
-      result = newENil()
+    result = newENil()
   of EBool:
-      result = newETerm(p.bval)
+    result = newETerm(p.bval)
   of EInt32:
-      result = newETerm(p.n32)
+    result = newETerm(p.n32)
   of EInt64:
-      result = newETerm(p.n64)
+    result = newETerm(p.n64)
+  of EUInt32:
+    result = newETerm(p.u32)
+  of EUInt64:
+    result = newETerm(p.u64)
   of EFloat32:
-      result = newETerm(p.f32)
+    result = newETerm(p.f32)
   of EFloat64:
-      result = newETerm(p.f64)
+    result = newETerm(p.f64)
   of EString:
-      result = newETerm(p.str)
+    result = newETerm(p.str)
   of EBinary:
-      result = newETerm(p.bin)
+    result = newETerm(p.bin)
   of EBitBinary:
-      result = newETerm(p.bit)
+    result = newETerm(p.bit)
+  of EAtom:
+    result = newETerm(p.atm)
   of EPid:
-      result = newETerm(p.epid)
+    result = newETerm(p.epid)
   of ERef:
-      result = newETerm(p.eref)
+    result = newETerm(p.eref)
   of EFun:
-      result = newETerm(p.epid)
-  of EList:
-      result = newETerm(p.elems)
+    result = newETerm(p.epid)
   of ECharList:
-      result = newETerm(p.chars)
-  of EMap:
-      result = newETerm(p.fields)
-  of JObject:
-      result = newJObject()
-      for key, val in pairs(p.fields):
-      result.fields[key] = copy(val)
-  of JArray:
-    result = newJArray()
+    result = newETerm(p.chars)
+  of ETupleN:
+    result = newETuple()
     for i in items(p.elems):
       result.elems.add(copy(i))
+  of Emap:
+    result = newEMap()
+    for key, val in pairs(p.fields):
+      result.fields[key] = copy(val)
+  of EList:
+    result = newEList()
+    for i in items(p.elems):
+      result.elems.add(copy(i))
+
+
+
