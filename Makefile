@@ -15,4 +15,4 @@ distclean: clean
 	rm -Rf $(NIMBLE_DIR) 
 
 deps:
-	nimble install -y --nimbleDir:$(NIMBLE_DIR) 
+	nimble install -y --nimbleDir:$(NIMBLE_DIR) patty

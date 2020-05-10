@@ -17,6 +17,9 @@ type
   ErlFun* = object
     val*: string
   ErlCharlist* = seq[char]
+  ErlKindError* = object of ValueError ## raised by the ``to`` macro if the
+                                        ## JSON kind is incorrect.
+  ErlParsingError* = object of ValueError ## is raised for a JSON error
 
 proc hash*(a: ErlAtom): Hash =
   result = a.val.hash
@@ -78,9 +81,9 @@ type
     of EString:
       str*: string
     of EBinary:
-      bin*: seq[char]
+      bin*: seq[byte]
     of EBitBinary:
-      bit*: seq[char]
+      bit*: seq[byte]
     # Erlang Types
     of ERef:
       eref*: ErlRef
@@ -146,9 +149,13 @@ proc newETerm*(s: string): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EString, str: s)
 
-proc newETerm*(s: seq[char]): ErlTerm =
+proc newETerm*(s: seq[byte]): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EBinary, bin: s)
+
+proc newETerm*(s: seq[char]): ErlTerm =
+  ## Creates a new `EString ErlTerm`.
+  result = ErlTerm(kind: ECharList, chars: s)
 
 proc newETuple*(): ErlTerm =
   ## Creates a new `JObject ErlTerm`
@@ -215,14 +222,14 @@ proc getString*(n: ErlTerm, default: string = ""): string =
   if n.isNil or n.kind != EString: return default
   else: return n.str
 
-proc getBinary*(n: ErlTerm, default: seq[char] = @[]): seq[char] =
+proc getBinary*(n: ErlTerm, default: seq[byte] = @[]): seq[byte] =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EBinary: return default
   else: return n.bin
 
-proc getBitBinary*(n: ErlTerm, default: seq[char] = @[]): seq[char] =
+proc getBitBinary*(n: ErlTerm, default: seq[byte] = @[]): seq[byte] =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
@@ -597,60 +604,99 @@ proc copy*(p: ErlTerm): ErlTerm =
     for i in items(p.elems):
       result.elems.add(copy(i))
 
+type
+  ErlStream* = ref ErlStreamObj
+    ## A stream that encapsulates a string.
+    ##
+    ## **Note:** Not available for JS backend.
+  ErlStreamObj* = object
+    ## A string stream object.
+    ##
+    ## **Note:** Not available for JS backend.
+    data*: string ## A string data.
+                  ## This is updated when called `writeLine` etc.
+    pos*: cint
 
-proc toUgly*(result: var string, node: ErlTerm) =
+proc newErlStream*(capacity: int): ErlStream =
+  new(result)
+  result.data = newString(capacity)
+  zeroMem(addr(result.data), capacity) 
+  result.pos = 0
+
+proc ensureAvailable*(ss: ErlStream, count: int) =
+  var ydata = newString(2 * ss.data.len())
+  copyMem(addr(ydata), addr(ss.data), ss.pos) 
+  ss.data = ydata
+
+proc `addr`*(ss: var ErlStream): cstring =
+  return cstring(ss.data)
+
+proc indexAddr*(ss: var ErlStream): ptr cint =
+  return addr(ss.pos)
+
+proc available*(ss: var ErlStream): int =
+  return len(ss.data) - ss.pos 
+
+proc hasAvailable*(ss: var ErlStream, bytes: int): bool =
+  return (len(ss.data) - ss.pos) >= bytes
+
+proc toUgly*(node: ErlTerm) =
+  let capacity = 128
+  var ss = newErlStream(capacity)
+  toUgly(ss, node)
+
+proc toUgly*(ss: var ErlStream, node: ErlTerm(kind=EList, elems) ) =
+  echo "test"
+
+proc toUgly*(ss: var ErlStream, node: ErlTerm) =
   ## Converts `node` to its JSON Representation, without
-  ## regard for human readability. Meant to improve ``$`` string
-  ## conversion performance.
-  ##
-  ## JSON representation is stored in the passed `result`
-  ##
-  ## This provides higher efficiency than the ``pretty`` procedure as it
-  ## does **not** attempt to format the resulting JSON to make it human readable.
-  ## 
-  case p.kind
-  of ENil:
-    result = newENil()
-  of EBool:
-    result = newETerm(p.bval)
-  of EInt32:
-    result = newETerm(p.n32)
-  of EInt64:
-    result = newETerm(p.n64)
-  of EUInt32:
-    result = newETerm(p.u32)
-  of EUInt64:
-    result = newETerm(p.u64)
-  of EFloat32:
-    result = newETerm(p.f32)
-  of EFloat64:
-    result = newETerm(p.f64)
-  of EString:
-    result = newETerm(p.str)
-  of EBinary:
-    result = newETerm(p.bin)
-  of EBitBinary:
-    result = newETerm(p.bit)
-  of EAtom:
-    result = newETerm(p.atm)
-  of EPid:
-    result = newETerm(p.epid)
-  of ERef:
-    result = newETerm(p.eref)
-  of EFun:
-    result = newETerm(p.epid)
-  of ECharList:
-    result = newETerm(p.chars)
-  of ETupleN:
-    result = newETuple()
-    for i in items(p.elems):
-      result.elems.add(copy(i))
-  of Emap:
-    result = newEMap()
-    for key, val in pairs(p.fields):
-      result.fields[key] = copy(val)
-  of EList:
-    result = newEList()
-    for i in items(p.elems):
-      result.elems.add(copy(i))
   
+  # This should be enough for any fixed sized
+  # variable lengths like binaries are checked for their length
+  const minFree = 8
+
+  case node.kind:
+  of EList:
+    let cnt: cint = len(node).cint
+    ss.ensureAvailable(8)
+    if ei_encode_list_header(addr(ss), indexAddr(ss), cnt) != 0:
+      raise newException(ErlKindError, "list encode error")
+    for child in node.elems:
+      ss.toUgly(child)
+  of EMap:
+    let cnt: cint = len(node).cint
+    ss.ensureAvailable(8)
+    if ei_encode_map_header(addr(ss), indexAddr(ss), cnt) != 0:
+      raise newException(ErlKindError, "map encode error")
+    for child in node.elems:
+      ss.toUgly(child)
+  of EString:
+    var val: string = node.str
+    let cnt: cint = len(val).cint
+    ss.ensureAvailable(len(val)+minFree)
+    if ei_encode_string_len(addr(ss), indexAddr(ss), cstring(val), cnt) != 0:
+      raise newException(ErlKindError, "string encode error")
+  of EBinary:
+    var val: seq[byte] = node.bin
+    let cnt: cint = len(val).cint
+    ss.ensureAvailable(len(val)+minFree)
+    var valAddr: cstring = cast[cstring](addr(val[0]))
+    if ei_encode_string_len(addr(ss), indexAddr(ss), valAddr, cnt) != 0:
+      raise newException(ErlKindError, "string encode error")
+  of EInt32:
+    var val = node.getInt32()
+    ss.ensureAvailable(minFree)
+    if ei_encode_long(addr(ss), indexAddr(ss), val) != 0:
+      raise newException(ErlKindError, "int32 encode error")
+  of EInt64:
+    var val = node.getInt64()
+    ss.ensureAvailable(minFree)
+    if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
+      raise newException(ErlKindError, "int64 encode error")
+  of EFloat32:
+    var val = node.getFloat32()
+    ss.ensureAvailable(minFree)
+    if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
+      raise newException(ErlKindError, "int64 encode error")
+  of EBool:
+  of ENil:
