@@ -6,7 +6,6 @@ import posix
 import segfaults
 import net
 
-import nimler/codec
 import erts_include/ei 
 
 const
