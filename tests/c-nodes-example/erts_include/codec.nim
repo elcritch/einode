@@ -26,6 +26,7 @@ proc hash*(a: ErlAtom): Hash =
   result = !$result
 
 const AtomOk* = ErlAtom(val: "ok")
+const AtomNil* = ErlAtom(val: "nil")
 const AtomError* = ErlAtom(val: "error")
 const AtomTrue* = ErlAtom(val: "true")
 const AtomFalse* = ErlAtom(val: "false")
@@ -39,8 +40,7 @@ type
     EUInt32,
     EInt64,
     EUInt64,
-    EFloat32,
-    EFloat64,
+    EDouble,
     EAtom,
     # Erlang Types
     EString,
@@ -71,9 +71,7 @@ type
       u64*: uint64
     of EInt64:
       n64*: int64
-    of EFloat32:
-      f32*: float32
-    of EFloat64:
+    of EDouble:
       f64*: float64
     of EAtom:
       atm*: ErlAtom
@@ -125,13 +123,9 @@ proc newETerm*(n: uint64): ErlTerm =
   ## Creates a new `EInt ErlTerm`.
   result = ErlTerm(kind: EUInt64, u64: n)
 
-proc newETerm*(n: float32): ErlTerm =
-  ## Creates a new `EFloat ErlTerm`.
-  result = ErlTerm(kind: EFloat32, f32: n)
-
 proc newETerm*(n: float64): ErlTerm =
   ## Creates a new `EFloat ErlTerm`.
-  result = ErlTerm(kind: EFloat64, f64: n)
+  result = ErlTerm(kind: EDouble, f64: n)
 
 proc newETerm*(s: ErlAtom): ErlTerm =
   ## Creates a new `EString ErlTerm`.
@@ -194,25 +188,18 @@ proc getInt64*(n: ErlTerm, default: int64 = 0): int64 =
   if n.isNil or n.kind != EInt64: return default
   else: return n.n64
 
-proc getFloat32*(n: ErlTerm, default: float32 = 0): float32 =
-  ## Retrieves the string value of a `JString ErlTerm`.
-  ##
-  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EFloat32: return default
-  else: return n.f32
-
 proc getFloat64*(n: ErlTerm, default: float64 = 0): float64 =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EFloat64: return default
+  if n.isNil or n.kind != EDouble: return default
   else: return n.f64
 
-proc getAtom*(n: ErlTerm, default: ErlAtom = AtomOk ): ErlAtom =
+proc getAtom*(n: ErlTerm, default: ErlAtom = AtomNil ): ErlAtom =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EFloat64: return default
+  if n.isNil or n.kind != EAtom: return default
   else: return n.atm
 
 proc getString*(n: ErlTerm, default: string = ""): string =
@@ -264,7 +251,7 @@ proc getFun*(n: ErlTerm): Option[ErlFun] =
   if n.isNil or n.kind != EBitBinary: return none(ErlFun)
   else: return some(n.efun)
 
-proc getFields*(n: ErlTerm,
+proc getMap*(n: ErlTerm,
     default = initOrderedTable[ErlTerm, ErlTerm](4)):
         OrderedTable[ErlTerm, ErlTerm] =
   ## Retrieves the key, value pairs of a `JObject ErlTerm`.
@@ -301,9 +288,7 @@ proc hash*(n: ErlTerm): Hash =
       result = hash(n.n32)
     of EInt64:
       result = hash(n.n64)
-    of EFloat32:
-      result = hash(n.f32)
-    of EFloat64:
+    of EDouble:
       result = hash(n.f64)
     of EUInt32:
       result = hash(n.u32)
@@ -426,9 +411,7 @@ proc `==`*(a, b: ErlTerm): bool =
       result = a.u32 == b.u32
     of EUInt64:
       result = a.u64 == b.u64
-    of EFloat32:
-      result = a.f32 == b.f32
-    of EFloat64:
+    of EDouble:
       result = a.f64 == b.f64
     of EString:
       result = a.str == b.str
@@ -571,9 +554,7 @@ proc copy*(p: ErlTerm): ErlTerm =
     result = newETerm(p.u32)
   of EUInt64:
     result = newETerm(p.u64)
-  of EFloat32:
-    result = newETerm(p.f32)
-  of EFloat64:
+  of EDouble:
     result = newETerm(p.f64)
   of EString:
     result = newETerm(p.str)
@@ -640,14 +621,6 @@ proc available*(ss: var ErlStream): int =
 proc hasAvailable*(ss: var ErlStream, bytes: int): bool =
   return (len(ss.data) - ss.pos) >= bytes
 
-proc toUgly*(node: ErlTerm) =
-  let capacity = 128
-  var ss = newErlStream(capacity)
-  toUgly(ss, node)
-
-proc toUgly*(ss: var ErlStream, node: ErlTerm(kind=EList, elems) ) =
-  echo "test"
-
 proc toUgly*(ss: var ErlStream, node: ErlTerm) =
   ## Converts `node` to its JSON Representation, without
   
@@ -657,31 +630,29 @@ proc toUgly*(ss: var ErlStream, node: ErlTerm) =
 
   case node.kind:
   of EList:
-    let cnt: cint = len(node).cint
+    var elems: seq[ErlTerm] = node.elems
     ss.ensureAvailable(8)
-    if ei_encode_list_header(addr(ss), indexAddr(ss), cnt) != 0:
+    if ei_encode_list_header(addr(ss), indexAddr(ss), elems.len.cint) != 0:
       raise newException(ErlKindError, "list encode error")
     for child in node.elems:
       ss.toUgly(child)
   of EMap:
-    let cnt: cint = len(node).cint
+    var fields: OrderedTable[ErlTerm, ErlTerm] = getMap(node)
     ss.ensureAvailable(8)
-    if ei_encode_map_header(addr(ss), indexAddr(ss), cnt) != 0:
+    if ei_encode_map_header(addr(ss), indexAddr(ss), fields.len.cint) != 0:
       raise newException(ErlKindError, "map encode error")
     for child in node.elems:
       ss.toUgly(child)
   of EString:
     var val: string = node.str
-    let cnt: cint = len(val).cint
     ss.ensureAvailable(len(val)+minFree)
-    if ei_encode_string_len(addr(ss), indexAddr(ss), cstring(val), cnt) != 0:
+    if ei_encode_string_len(addr(ss), indexAddr(ss), cstring(val), val.len.cint) != 0:
       raise newException(ErlKindError, "string encode error")
   of EBinary:
     var val: seq[byte] = node.bin
-    let cnt: cint = len(val).cint
     ss.ensureAvailable(len(val)+minFree)
     var valAddr: cstring = cast[cstring](addr(val[0]))
-    if ei_encode_string_len(addr(ss), indexAddr(ss), valAddr, cnt) != 0:
+    if ei_encode_string_len(addr(ss), indexAddr(ss), valAddr, val.len.cint) != 0:
       raise newException(ErlKindError, "string encode error")
   of EInt32:
     var val = node.getInt32()
@@ -694,9 +665,16 @@ proc toUgly*(ss: var ErlStream, node: ErlTerm) =
     if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
       raise newException(ErlKindError, "int64 encode error")
   of EFloat32:
-    var val = node.getFloat32()
+    var val = node.getFloat32().float64
     ss.ensureAvailable(minFree)
-    if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
-      raise newException(ErlKindError, "int64 encode error")
+    if ei_encode_double(addr(ss), indexAddr(ss), val) != 0:
+      raise newException(ErlKindError, "float encode error")
   of EBool:
+    echo "nill"
   of ENil:
+    echo "nill"
+
+proc toUgly*(node: ErlTerm) =
+  let capacity = 128
+  var ss = newErlStream(capacity)
+  toUgly(ss, node)
