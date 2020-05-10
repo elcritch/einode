@@ -36,24 +36,25 @@ type
   ErlTermKind* = enum ## possible JSON node types
     ENil,
     EBool,
+    EChar,
     EInt32,
     EUInt32,
     EInt64,
     EUInt64,
     EDouble,
     EAtom,
-    # Erlang Types
+    ## Erlang Types ##
     EString,
     EBinary,
-    EBitBinary,
-    # Erlang Types
+    # EBitBinary,
+    ## Erlang Types ##
     ERef,
     EPid,
     EFun,
-    # Composite
+    ## Composite ##
     EMap,
     EList,
-    ECharList,
+    # ECharList,
     ETupleN
 
   ErlTerm* = ref ErlTermObj ## JSON node
@@ -63,6 +64,8 @@ type
       nil
     of EBool:
       bval*: bool
+    of EChar:
+      cval*: char
     of EInt32:
       n32*: int32
     of EUInt32:
@@ -80,8 +83,8 @@ type
       str*: string
     of EBinary:
       bin*: seq[byte]
-    of EBitBinary:
-      bit*: seq[byte]
+    # of EBitBinary:
+      # bit*: seq[byte]
     # Erlang Types
     of ERef:
       eref*: ErlRef
@@ -96,8 +99,8 @@ type
       items*: seq[ErlTerm]
     of EList:
       elems*: seq[ErlTerm]
-    of ECharList:
-      chars*: seq[char]
+    # of ECharList:
+      # chars*: seq[char]
 
 proc newETerm*(s: bool): ErlTerm =
   ## Creates a new `EString ErlTerm`.
@@ -147,9 +150,9 @@ proc newETerm*(s: seq[byte]): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EBinary, bin: s)
 
-proc newETerm*(s: seq[char]): ErlTerm =
+proc newETerm*(s: char): ErlTerm =
   ## Creates a new `EString ErlTerm`.
-  result = ErlTerm(kind: ECharList, chars: s)
+  result = ErlTerm(kind: EChar, cval: s)
 
 proc newETuple*(): ErlTerm =
   ## Creates a new `JObject ErlTerm`
@@ -173,6 +176,13 @@ proc getBool*(n: ErlTerm, default: bool = false): bool =
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EBool: return default
   else: return n.bval
+
+proc getChar*(n: ErlTerm, default: char = '\0'): char =
+  ## Retrieves the string value of a `JString ErlTerm`.
+  ##
+  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
+  if n.isNil or n.kind != EChar: return default
+  else: return n.cval
 
 proc getInt32*(n: ErlTerm, default: int32 = 0): int32 =
   ## Retrieves the string value of a `JString ErlTerm`.
@@ -230,39 +240,25 @@ proc getBinary*(n: ErlTerm, default: seq[byte] = @[]): seq[byte] =
   if n.isNil or n.kind != EBinary: return default
   else: return n.bin
 
-proc getBitBinary*(n: ErlTerm, default: seq[byte] = @[]): seq[byte] =
-  ## Retrieves the string value of a `JString ErlTerm`.
-  ##
-  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EBitBinary: return default
-  else: return n.bit
-
-proc getCharList*(n: ErlTerm, default: seq[char] = @[]): seq[char] =
-  ## Retrieves the string value of a `JString ErlTerm`.
-  ##
-  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != ECharList: return default
-  else: return n.chars
-
 proc getRef*(n: ErlTerm): Option[ErlRef] =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EBitBinary: return none(ErlRef)
+  if n.isNil or n.kind != ERef: return none(ErlRef)
   else: return some(n.eref)
 
 proc getPid*(n: ErlTerm): Option[ErlPid] =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EBitBinary: return none(ErlPid)
+  if n.isNil or n.kind != EPid: return none(ErlPid)
   else: return some(n.epid)
 
 proc getFun*(n: ErlTerm): Option[ErlFun] =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EBitBinary: return none(ErlFun)
+  if n.isNil or n.kind != EFun: return none(ErlFun)
   else: return some(n.efun)
 
 proc getMap*(n: ErlTerm,
@@ -298,6 +294,8 @@ proc hash*(n: ErlTerm): Hash =
       result = Hash(0)
     of EBool:
       result = hash(n.bval.int)
+    of EChar:
+      result = hash(n.cval)
     of EInt32:
       result = hash(n.n32)
     of EInt64:
@@ -312,8 +310,6 @@ proc hash*(n: ErlTerm): Hash =
       result = hash(n.str)
     of EBinary:
       result = hash(n.bin)
-    of EBitBinary:
-      result = hash(n.bit)
     of EAtom:
       result = hash(n.atm)
     of EPid:
@@ -326,8 +322,6 @@ proc hash*(n: ErlTerm): Hash =
       result = hash(n.elems)
     of ETupleN:
       result = hash(n.items)
-    of ECharList:
-      result = hash(n.chars)
     of EMap:
       result = hash(n.fields)
 
@@ -417,6 +411,8 @@ proc `==`*(a, b: ErlTerm): bool =
       result = true
     of EBool:
       result = a.bval == b.bval
+    of EChar:
+      result = a.cval == b.cval
     of EInt32:
       result = a.n32 == b.n32
     of EInt64:
@@ -431,8 +427,6 @@ proc `==`*(a, b: ErlTerm): bool =
       result = a.str == b.str
     of EBinary:
       result = a.bin == b.bin
-    of EBitBinary:
-      result = a.bit == b.bit
     of EAtom:
       result = a.atm == b.atm
     of EPid:
@@ -445,8 +439,6 @@ proc `==`*(a, b: ErlTerm): bool =
       result = a.items == b.items
     of EList:
       result = a.elems == b.elems
-    of ECharList:
-      result = a.chars == b.chars
     of EMap:
       # we cannot use OrderedTable's equality here as
       # the order does not matter for equality here.
@@ -560,6 +552,8 @@ proc copy*(p: ErlTerm): ErlTerm =
     result = newENil()
   of EBool:
     result = newETerm(p.bval)
+  of EChar:
+    result = newETerm(p.cval)
   of EInt32:
     result = newETerm(p.n32)
   of EInt64:
@@ -574,8 +568,6 @@ proc copy*(p: ErlTerm): ErlTerm =
     result = newETerm(p.str)
   of EBinary:
     result = newETerm(p.bin)
-  of EBitBinary:
-    result = newETerm(p.bit)
   of EAtom:
     result = newETerm(p.atm)
   of EPid:
@@ -584,8 +576,6 @@ proc copy*(p: ErlTerm): ErlTerm =
     result = newETerm(p.eref)
   of EFun:
     result = newETerm(p.epid)
-  of ECharList:
-    result = newETerm(p.chars)
   of ETupleN:
     result = newETuple()
     for i in items(p.elems):
@@ -641,20 +631,26 @@ proc toUgly*(ss: var ErlStream, node: ErlTerm) =
   # This should be enough for any fixed sized
   # variable lengths like binaries are checked for their length
   const minFree = 8
+  ss.ensureAvailable(minFree)
 
   case node.kind:
   of EList:
-    var elems: seq[ErlTerm] = node.elems
-    ss.ensureAvailable(8)
-    if ei_encode_list_header(addr(ss), indexAddr(ss), elems.len.cint) != 0:
+    var vals: seq[ErlTerm] = node.elems
+    if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "list encode error")
     for child in node.elems:
       ss.toUgly(child)
   of EMap:
-    var fields: OrderedTable[ErlTerm, ErlTerm] = getMap(node)
+    var vals: OrderedTable[ErlTerm, ErlTerm] = getMap(node)
     ss.ensureAvailable(8)
-    if ei_encode_map_header(addr(ss), indexAddr(ss), fields.len.cint) != 0:
+    if ei_encode_map_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "map encode error")
+    for child in node.elems:
+      ss.toUgly(child)
+  of ETupleN:
+    var vals: seq[ErlTerm] = node.items
+    if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
+      raise newException(ErlKindError, "list encode error")
     for child in node.elems:
       ss.toUgly(child)
   of EString:
@@ -668,34 +664,36 @@ proc toUgly*(ss: var ErlStream, node: ErlTerm) =
     var valAddr: cstring = cast[cstring](addr(val[0]))
     if ei_encode_string_len(addr(ss), indexAddr(ss), valAddr, val.len.cint) != 0:
       raise newException(ErlKindError, "string encode error")
+  # of EBitBinary:
+    # raise newException(ValueError, "not implemented")
+  # of ECharList:
+    # raise newException(ValueError, "not implemented")
   of EInt32:
     var val = node.getInt32()
-    ss.ensureAvailable(minFree)
     if ei_encode_long(addr(ss), indexAddr(ss), val) != 0:
       raise newException(ErlKindError, "int32 encode error")
   of EInt64:
     var val = node.getInt64()
-    ss.ensureAvailable(minFree)
     if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
       raise newException(ErlKindError, "int64 encode error")
   of EUInt32:
     var val = node.getUInt32()
-    ss.ensureAvailable(minFree)
     if ei_encode_ulong(addr(ss), indexAddr(ss), val.uint32) != 0:
       raise newException(ErlKindError, "float encode error")
   of EUInt64:
     var val = node.getUInt32()
-    ss.ensureAvailable(minFree)
     if ei_encode_ulonglong(addr(ss), indexAddr(ss), val.uint64) != 0:
       raise newException(ErlKindError, "float encode error")
   of EDouble:
     var val = node.getFloat64()
-    ss.ensureAvailable(minFree)
     if ei_encode_double(addr(ss), indexAddr(ss), val) != 0:
+      raise newException(ErlKindError, "float encode error")
+  of EChar:
+    var val = node.getChar()
+    if ei_encode_boolean(addr(ss), indexAddr(ss), val.cint) != 0:
       raise newException(ErlKindError, "float encode error")
   of EBool:
     var val = node.getBool()
-    ss.ensureAvailable(minFree)
     if ei_encode_boolean(addr(ss), indexAddr(ss), val.cint) != 0:
       raise newException(ErlKindError, "float encode error")
   of ENil:
