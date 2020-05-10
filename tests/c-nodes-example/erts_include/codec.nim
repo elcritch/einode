@@ -188,6 +188,20 @@ proc getInt64*(n: ErlTerm, default: int64 = 0): int64 =
   if n.isNil or n.kind != EInt64: return default
   else: return n.n64
 
+proc getUInt32*(n: ErlTerm, default: uint32 = 0): uint32 =
+  ## Retrieves the string value of a `JString ErlTerm`.
+  ##
+  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
+  if n.isNil or n.kind != EUInt32: return default
+  else: return n.u32
+
+proc getUInt64*(n: ErlTerm, default: uint64 = 0): uint64 =
+  ## Retrieves the string value of a `JString ErlTerm`.
+  ##
+  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
+  if n.isNil or n.kind != EUInt64: return default
+  else: return n.u64
+
 proc getFloat64*(n: ErlTerm, default: float64 = 0): float64 =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
@@ -664,15 +678,28 @@ proc toUgly*(ss: var ErlStream, node: ErlTerm) =
     ss.ensureAvailable(minFree)
     if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
       raise newException(ErlKindError, "int64 encode error")
-  of EFloat32:
-    var val = node.getFloat32().float64
+  of EUInt32:
+    var val = node.getUInt32()
+    ss.ensureAvailable(minFree)
+    if ei_encode_ulong(addr(ss), indexAddr(ss), val.uint32) != 0:
+      raise newException(ErlKindError, "float encode error")
+  of EUInt64:
+    var val = node.getUInt32()
+    ss.ensureAvailable(minFree)
+    if ei_encode_ulonglong(addr(ss), indexAddr(ss), val.uint64) != 0:
+      raise newException(ErlKindError, "float encode error")
+  of EDouble:
+    var val = node.getFloat64()
     ss.ensureAvailable(minFree)
     if ei_encode_double(addr(ss), indexAddr(ss), val) != 0:
       raise newException(ErlKindError, "float encode error")
   of EBool:
-    echo "nill"
+    var val = node.getBool()
+    ss.ensureAvailable(minFree)
+    if ei_encode_boolean(addr(ss), indexAddr(ss), val.cint) != 0:
+      raise newException(ErlKindError, "float encode error")
   of ENil:
-    echo "nill"
+    ss.toUgly(newETerm(AtomNil))
 
 proc toUgly*(node: ErlTerm) =
   let capacity = 128
