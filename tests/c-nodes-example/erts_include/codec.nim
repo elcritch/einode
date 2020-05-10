@@ -230,6 +230,13 @@ proc getBitBinary*(n: ErlTerm, default: seq[char] = @[]): seq[char] =
   if n.isNil or n.kind != EBitBinary: return default
   else: return n.bit
 
+proc getCharList*(n: ErlTerm, default: seq[char] = @[]): seq[char] =
+  ## Retrieves the string value of a `JString JsonNode`.
+  ##
+  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
+  if n.isNil or n.kind != ECharList: return default
+  else: return n.chars
+
 proc getRef*(n: ErlTerm): Option[ErlRef] =
   ## Retrieves the string value of a `JString JsonNode`.
   ##
@@ -273,7 +280,7 @@ proc add*(father, child: ErlTerm) =
   assert father.kind == EList
   father.elems.add(child)
 
-proc add*(obj: ErlTerm, key: string, val: ErlTerm) =
+proc add*(obj: ErlTerm, key: ErlTerm, val: ErlTerm) =
   ## Sets a field from a `JObject`.
   assert obj.kind == EMap
   obj.fields[key] = val
@@ -282,7 +289,7 @@ proc `%`*[T](v: T): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = newETerm(v)
 
-proc `[]=`*(obj: ErlTerm, key: string, val: ErlTerm) {.inline.} =
+proc `[]=`*(obj: ErlTerm, key: ErlTerm, val: ErlTerm) {.inline.} =
   ## Sets a field from a `JObject`.
   assert(obj.kind == EMap)
   obj.fields[key] = val
@@ -307,13 +314,13 @@ proc `%`*(o: enum): ErlTerm =
 proc toJson(x: NimNode): NimNode {.compileTime.} =
   case x.kind
   of nnkBracket: # array
-    if x.len == 0: return newCall(bindSym"newJArray")
+    if x.len == 0: return newCall(bindSym"newEList")
     result = newNimNode(nnkBracket)
     for i in 0 ..< x.len:
       result.add(toJson(x[i]))
     result = newCall(bindSym("%", brOpen), result)
   of nnkTableConstr: # object
-    if x.len == 0: return newCall(bindSym"newJObject")
+    if x.len == 0: return newCall(bindSym"newEMap")
     result = newNimNode(nnkTableConstr)
     for i in 0 ..< x.len:
       x[i].expectKind nnkExprColonExpr
@@ -321,9 +328,9 @@ proc toJson(x: NimNode): NimNode {.compileTime.} =
     result = newCall(bindSym("%", brOpen), result)
   of nnkCurly: # empty object
     x.expectLen(0)
-    result = newCall(bindSym"newJObject")
+    result = newCall(bindSym"newEMap")
   of nnkNilLit:
-    result = newCall(bindSym"newJNull")
+    result = newCall(bindSym"newENil")
   of nnkPar:
     if x.len == 1: result = toJson(x[0])
     else: result = newCall(bindSym("%", brOpen), x)
@@ -335,51 +342,132 @@ macro `%*`*(x: untyped): untyped =
   ## `%` for every element.
   result = toJson(x)
 
-
-
-macro generic_params(T: typedesc): untyped =
-  result = newNimNode(nnkTupleConstr)
-  var impl = getTypeImpl(T)
-  expectKind(impl, nnkBracketExpr)
-  impl = impl[1]
-  while true:
-    case impl.kind
-      of nnkSym:
-        impl = impl.getImpl
-        continue
-      of nnkTypeDef:
-        impl = impl[2]
-        continue
-      of nnkBracketExpr:
-        for i in 1..<impl.len:
-          result.add impl[i]
-        break
-      else:
-        error "wrong kind: " & $impl.kind
-
-
-proc toJson(x: NimNode): NimNode {.compileTime.} =
-  case x.kind
-  of nnkBracket: # array
-    if x.len == 0: return newCall(bindSym"newJArray")
-    result = newNimNode(nnkBracket)
-    for i in 0 ..< x.len:
-      result.add(toJson(x[i]))
-    result = newCall(bindSym("%", brOpen), result)
-  of nnkTableConstr: # object
-    if x.len == 0: return newCall(bindSym"newJObject")
-    result = newNimNode(nnkTableConstr)
-    for i in 0 ..< x.len:
-      x[i].expectKind nnkExprColonExpr
-      result.add newTree(nnkExprColonExpr, x[i][0], toJson(x[i][1]))
-    result = newCall(bindSym("%", brOpen), result)
-  of nnkCurly: # empty object
-    x.expectLen(0)
-    result = newCall(bindSym"newJObject")
-  of nnkNilLit:
-    result = newCall(bindSym"newJNull")
-  of nnkPar:
-    if x.len == 1: result = toJson(x[0])
-    else: result = newCall(bindSym("%", brOpen), x)
+proc `==`*(a, b: ErlTerm): bool =
+  ## Check two nodes for equality
+  if a.isNil:
+    if b.isNil: return true
+    return false
+  elif b.isNil or a.kind != b.kind:
+    return false
   else:
-    result = newCall(bindSym("%", brOpen), x)
+    case a.kind
+    of ENil:
+      result = true
+    of EBool:
+      result = a.bval == b.bval
+    of EInt32:
+      result = a.n32 == b.n32
+    of EInt64:
+      result = a.n64 == b.n64
+    of EFloat32:
+      result = a.f32 == b.f32
+    of EFloat64:
+      result = a.f64 == b.f64
+    of EString:
+      result = a.str == b.str
+    of EBinary:
+      result = a.bin == b.bin
+    of EBitBinary:
+      result = a.bit == b.bit
+    of EPid:
+      result = a.epid == b.epid
+    of ERef:
+      result = a.eref == b.eref
+    of EFun:
+      result = a.efun == b.efun
+    of EList:
+      result = a.elems == b.elems
+    of ECharList:
+      result = a.chars == b.chars
+    of EMap:
+      # we cannot use OrderedTable's equality here as
+      # the order does not matter for equality here.
+      if a.fields.len != b.fields.len: return false
+      for key, val in a.fields:
+        if not b.fields.hasKey(key): return false
+        if b.fields[key] != val: return false
+      result = true
+
+proc hash*(n: ErlPid): Hash =
+    n.val.hash()
+proc hash*(n: ErlAtom): Hash =
+    n.val.hash()
+proc hash*(n: ErlRef): Hash =
+    n.val.hash()
+proc hash*(n: ErlFun): Hash =
+    n.val.hash()
+
+proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash {.noSideEffect.}
+
+proc hash*(n: ErlTerm): Hash =
+  ## Compute the hash for a JSON node
+  case n.kind
+    of ENil:
+      result = Hash(0)
+    of EBool:
+      result = hash(n.bval.int)
+    of EInt32:
+      result = hash(n.n32)
+    of EInt64:
+      result = hash(n.n64)
+    of EFloat32:
+      result = hash(n.f32)
+    of EFloat64:
+      result = hash(n.f64)
+    of EString:
+      result = hash(n.str)
+    of EBinary:
+      result = hash(n.bin)
+    of EBitBinary:
+      result = hash(n.bit)
+    of EPid:
+      result = hash(n.epid)
+    of ERef:
+      result = hash(n.eref)
+    of EFun:
+      result = hash(n.epid)
+    of EList:
+      result = hash(n.elems)
+    of ECharList:
+      result = hash(n.chars)
+    of EMap:
+      result = hash(n.fields)
+
+
+proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash =
+  for key, val in n:
+    result = result xor (hash(key) !& hash(val))
+  result = !$result
+
+proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash =
+  for key, val in n:
+    result = result xor (hash(key) !& hash(val))
+  result = !$result
+
+proc len*(n: ErlTerm): int =
+  ## If `n` is a `JArray`, it returns the number of elements.
+  ## If `n` is a `JObject`, it returns the number of pairs.
+  ## Else it returns 0.
+  case n.kind
+  of EList: result = n.elems.len
+  of EMap: result = n.fields.len
+  else: discard
+
+proc `[]`*(node: ErlTerm, name: ErlTerm): ErlTerm {.inline.} =
+  ## Gets a field from a `JObject`, which must not be nil.
+  ## If the value at `name` does not exist, raises KeyError.
+  assert(not isNil(node))
+  assert(node.kind == JObject)
+  when defined(nimErlGet):
+    if not node.fields.hasKey(name): return nil
+  result = node.fields[name]
+
+proc `[]`*(node: ErlTerm, index: int): ErlTerm {.inline.} =
+  ## Gets the node at `index` in an Array. Result is undefined if `index`
+  ## is out of bounds, but as long as array bound checks are enabled it will
+  ## result in an exception.
+  assert(not isNil(node))
+  assert(node.kind == JArray)
+  return node.elems[index]
+
+
