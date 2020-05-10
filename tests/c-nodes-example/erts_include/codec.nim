@@ -51,13 +51,6 @@ type
     EMap,
     EList,
     ECharList,
-    ETuple0,
-    ETuple1,
-    ETuple2,
-    ETuple3,
-    ETuple4,
-    ETuple5,
-    ETuple6,
     ETupleN
 
   ErlTerm* = ref ErlTermObj ## JSON node
@@ -70,9 +63,9 @@ type
     of EInt32:
       n32*: int32
     of EUInt32:
-      un32*: uint32
+      u32*: uint32
     of EUInt64:
-      un64*: uint64
+      u64*: uint64
     of EInt64:
       n64*: int64
     of EFloat32:
@@ -98,22 +91,8 @@ type
     # Composite
     of EMap:
       fields*: OrderedTable[ErlTerm, ErlTerm]
-    of ETuple0:
-      tpl0*: tuple[]
-    of ETuple1:
-      tpl1*: tuple[f0: ErlTerm]
-    of ETuple2:
-      tpl2*: tuple[f0: ErlTerm, f1: ErlTerm]
-    of ETuple3:
-      tpl3*: tuple[f0: ErlTerm, f1: ErlTerm, f2: ErlTerm]
-    of ETuple4:
-      tpl4*: tuple[f0: ErlTerm, f1: ErlTerm, f2: ErlTerm, f3: ErlTerm]
-    of ETuple5:
-      tpl5*: tuple[f0: ErlTerm, f1: ErlTerm, f2: ErlTerm, f3: ErlTerm, f4: ErlTerm]
-    of ETuple6:
-      tpl6*: tuple[f0: ErlTerm, f1: ErlTerm, f2: ErlTerm, f3: ErlTerm, f4: ErlTerm, f5: ErlTerm]
     of ETupleN:
-      tpl_elems*: seq[ErlTerm]
+      items*: seq[ErlTerm]
     of EList:
       elems*: seq[ErlTerm]
     of ECharList:
@@ -147,6 +126,14 @@ proc newETerm*(s: ErlAtom): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EAtom, atm: s)
 
+proc newETerm*(s: ErlPid): ErlTerm =
+  ## Creates a new `EString ErlTerm`.
+  result = ErlTerm(kind: EPid, epid: s)
+
+proc newETerm*(s: ErlRef): ErlTerm =
+  ## Creates a new `EString ErlTerm`.
+  result = ErlTerm(kind: ERef, eref: s)
+
 proc newETerm*(s: string): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EString, str: s)
@@ -156,11 +143,11 @@ proc newETerm*(s: seq[char]): ErlTerm =
   result = ErlTerm(kind: EBinary, bin: s)
 
 proc newEList*(): ErlTerm =
-  ## Creates a new `JObject JsonNode`
+  ## Creates a new `JObject ErlTerm`
   result = ErlTerm(kind: EList, elems: @[])
 
 proc newEMap*(): ErlTerm =
-  ## Creates a new `JObject JsonNode`
+  ## Creates a new `JObject ErlTerm`
   result = ErlTerm(kind: EMap, fields: initOrderedTable[ErlTerm, ErlTerm](4))
 
 proc newENil*(): ErlTerm =
@@ -168,91 +155,91 @@ proc newENil*(): ErlTerm =
   result = ErlTerm(kind: ENil)
 
 proc getBool*(n: ErlTerm, default: bool = false): bool =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EBool: return default
   else: return n.bval
 
 proc getInt32*(n: ErlTerm, default: int32 = 0): int32 =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EInt32: return default
   else: return n.n32
 
 proc getInt64*(n: ErlTerm, default: int64 = 0): int64 =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EInt64: return default
   else: return n.n64
 
 proc getFloat32*(n: ErlTerm, default: float32 = 0): float32 =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EFloat32: return default
   else: return n.f32
 
 proc getFloat64*(n: ErlTerm, default: float64 = 0): float64 =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EFloat64: return default
   else: return n.f64
 
 proc getAtom*(n: ErlTerm, default: ErlAtom = AtomOk ): ErlAtom =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EFloat64: return default
   else: return n.atm
 
 proc getString*(n: ErlTerm, default: string = ""): string =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EString: return default
   else: return n.str
 
 proc getBinary*(n: ErlTerm, default: seq[char] = @[]): seq[char] =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EBinary: return default
   else: return n.bin
 
 proc getBitBinary*(n: ErlTerm, default: seq[char] = @[]): seq[char] =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EBitBinary: return default
   else: return n.bit
 
 proc getCharList*(n: ErlTerm, default: seq[char] = @[]): seq[char] =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != ECharList: return default
   else: return n.chars
 
 proc getRef*(n: ErlTerm): Option[ErlRef] =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EBitBinary: return none(ErlRef)
   else: return some(n.eref)
 
 proc getPid*(n: ErlTerm): Option[ErlPid] =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EBitBinary: return none(ErlPid)
   else: return some(n.epid)
 
 proc getFun*(n: ErlTerm): Option[ErlFun] =
-  ## Retrieves the string value of a `JString JsonNode`.
+  ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
   if n.isNil or n.kind != EBitBinary: return none(ErlFun)
@@ -261,19 +248,76 @@ proc getFun*(n: ErlTerm): Option[ErlFun] =
 proc getFields*(n: ErlTerm,
     default = initOrderedTable[ErlTerm, ErlTerm](4)):
         OrderedTable[ErlTerm, ErlTerm] =
-  ## Retrieves the key, value pairs of a `JObject JsonNode`.
+  ## Retrieves the key, value pairs of a `JObject ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JObject``, or if ``n`` is nil.
   if n.isNil or n.kind != EMap: return default
   else: return n.fields
 
 proc getList*(n: ErlTerm, default: seq[ErlTerm] = @[]): seq[ErlTerm] =
-  ## Retrieves the array of a `JArray JsonNode`.
+  ## Retrieves the array of a `JArray ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JArray``, or if ``n`` is nil.
   if n.isNil or n.kind != EList: return default
   else: return n.elems
 
+
+proc hash*(n: ErlPid): Hash =
+    n.val.hash()
+proc hash*(n: ErlRef): Hash =
+    n.val.hash()
+proc hash*(n: ErlFun): Hash =
+    n.val.hash()
+
+proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash {.noSideEffect.}
+
+proc hash*(n: ErlTerm): Hash =
+  ## Compute the hash for a JSON node
+  case n.kind
+    of ENil:
+      result = Hash(0)
+    of EBool:
+      result = hash(n.bval.int)
+    of EInt32:
+      result = hash(n.n32)
+    of EInt64:
+      result = hash(n.n64)
+    of EFloat32:
+      result = hash(n.f32)
+    of EFloat64:
+      result = hash(n.f64)
+    of EUInt32:
+      result = hash(n.u32)
+    of EUInt64:
+      result = hash(n.u64)
+    of EString:
+      result = hash(n.str)
+    of EBinary:
+      result = hash(n.bin)
+    of EBitBinary:
+      result = hash(n.bit)
+    of EAtom:
+      result = hash(n.atm)
+    of EPid:
+      result = hash(n.epid)
+    of ERef:
+      result = hash(n.eref)
+    of EFun:
+      result = hash(n.epid)
+    of EList:
+      result = hash(n.elems)
+    of ETupleN:
+      result = hash(n.items)
+    of ECharList:
+      result = hash(n.chars)
+    of EMap:
+      result = hash(n.fields)
+
+
+proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash =
+  for key, val in n:
+    result = result xor (hash(key) !& hash(val))
+  result = !$result
 
 proc add*(father, child: ErlTerm) =
   ## Adds `child` to a JArray node `father`.
@@ -295,20 +339,20 @@ proc `[]=`*(obj: ErlTerm, key: ErlTerm, val: ErlTerm) {.inline.} =
   obj.fields[key] = val
 
 proc `%`*[T: object](o: T): ErlTerm =
-  ## Construct JsonNode from tuples and objects.
+  ## Construct ErlTerm from tuples and objects.
   result = newETerm()
   for k, v in o.fieldPairs: result[k] = %v
 
 proc `%`*(o: ref object): ErlTerm =
-  ## Generic constructor for JSON data. Creates a new `JObject JsonNode`
+  ## Generic constructor for JSON data. Creates a new `JObject ErlTerm`
   if o.isNil:
     result = newENil()
   else:
     result = %(o[])
 
 proc `%`*(o: enum): ErlTerm =
-  ## Construct a JsonNode that represents the specified enum value as a
-  ## string. Creates a new ``JString JsonNode``.
+  ## Construct a ErlTerm that represents the specified enum value as a
+  ## string. Creates a new ``JString ErlTerm``.
   result = %($o)
 
 proc toJson(x: NimNode): NimNode {.compileTime.} =
@@ -338,7 +382,7 @@ proc toJson(x: NimNode): NimNode {.compileTime.} =
     result = newCall(bindSym("%", brOpen), x)
 
 macro `%*`*(x: untyped): untyped =
-  ## Convert an expression to a JsonNode directly, without having to specify
+  ## Convert an expression to a ErlTerm directly, without having to specify
   ## `%` for every element.
   result = toJson(x)
 
@@ -388,61 +432,6 @@ proc `==`*(a, b: ErlTerm): bool =
         if b.fields[key] != val: return false
       result = true
 
-proc hash*(n: ErlPid): Hash =
-    n.val.hash()
-proc hash*(n: ErlAtom): Hash =
-    n.val.hash()
-proc hash*(n: ErlRef): Hash =
-    n.val.hash()
-proc hash*(n: ErlFun): Hash =
-    n.val.hash()
-
-proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash {.noSideEffect.}
-
-proc hash*(n: ErlTerm): Hash =
-  ## Compute the hash for a JSON node
-  case n.kind
-    of ENil:
-      result = Hash(0)
-    of EBool:
-      result = hash(n.bval.int)
-    of EInt32:
-      result = hash(n.n32)
-    of EInt64:
-      result = hash(n.n64)
-    of EFloat32:
-      result = hash(n.f32)
-    of EFloat64:
-      result = hash(n.f64)
-    of EString:
-      result = hash(n.str)
-    of EBinary:
-      result = hash(n.bin)
-    of EBitBinary:
-      result = hash(n.bit)
-    of EPid:
-      result = hash(n.epid)
-    of ERef:
-      result = hash(n.eref)
-    of EFun:
-      result = hash(n.epid)
-    of EList:
-      result = hash(n.elems)
-    of ECharList:
-      result = hash(n.chars)
-    of EMap:
-      result = hash(n.fields)
-
-
-proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash =
-  for key, val in n:
-    result = result xor (hash(key) !& hash(val))
-  result = !$result
-
-proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash =
-  for key, val in n:
-    result = result xor (hash(key) !& hash(val))
-  result = !$result
 
 proc len*(n: ErlTerm): int =
   ## If `n` is a `JArray`, it returns the number of elements.
@@ -470,4 +459,114 @@ proc `[]`*(node: ErlTerm, index: int): ErlTerm {.inline.} =
   assert(node.kind == JArray)
   return node.elems[index]
 
+proc hasKey*(node: ErlTerm, key: ErlTerm): bool =
+  ## Checks if `key` exists in `node`.
+  assert(node.kind == EMap)
+  result = node.fields.hasKey(key)
 
+proc contains*(node: ErlTerm, key: ErlTerm): bool =
+  ## Checks if `key` exists in `node`.
+  assert(node.kind == EMap)
+  node.fields.hasKey(key)
+
+proc contains*(node: ErlTerm, val: ErlTerm): bool =
+  ## Checks if `val` exists in array `node`.
+  assert(node.kind == EList)
+  find(node.elems, val) >= 0
+
+proc `{}`*(node: ErlTerm, keys: varargs[ErlTerm]): ErlTerm =
+  ## Traverses the node and gets the given value. If any of the
+  ## keys do not exist, returns ``nil``. Also returns ``nil`` if one of the
+  ## intermediate data structures is not an object.
+  ##
+  ## This proc can be used to create tree structures on the
+  ## fly (sometimes called `autovivification`:idx:):
+  ##
+  ## .. code-block:: nim
+  ##   myjson{"parent", "child", "grandchild"} = newJInt(1)
+  ##
+  result = node
+  for key in keys:
+    if isNil(result) or result.kind != EMap:
+      return nil
+    result = result.fields.getOrDefault(key)
+
+proc `{}`*(node: ErlTerm, index: varargs[int]): ErlTerm =
+  ## Traverses the node and gets the given value. If any of the
+  ## indexes do not exist, returns ``nil``. Also returns ``nil`` if one of the
+  ## intermediate data structures is not an array.
+  result = node
+  for i in index:
+    if isNil(result) or result.kind != EList or i >= node.len:
+      return nil
+    result = result.elems[i]
+
+proc getOrDefault*(node: ErlTerm, key: ErlTerm): ErlTerm =
+  ## Gets a field from a `node`. If `node` is nil or not an object or
+  ## value at `key` does not exist, returns nil
+  if not isNil(node) and node.kind == EMap:
+    result = node.fields.getOrDefault(key)
+
+proc `{}`*(node: ErlTerm, key: ErlTerm): ErlTerm =
+  ## Gets a field from a `node`. If `node` is nil or not an object or
+  ## value at `key` does not exist, returns nil
+  node.getOrDefault(key)
+
+proc `{}=`*(node: ErlTerm, keys: varargs[ErlTerm], value: ErlTerm) =
+  ## Traverses the node and tries to set the value at the given location
+  ## to ``value``. If any of the keys are missing, they are added.
+  var node = node
+  for i in 0..(keys.len-2):
+    if not node.hasKey(keys[i]):
+      node[keys[i]] = newEMap()
+    node = node[keys[i]]
+  node[keys[keys.len-1]] = value
+
+proc delete*(obj: ErlTerm, key: string) =
+  ## Deletes ``obj[key]``.
+  assert(obj.kind == EMap)
+  if not obj.fields.hasKey(key):
+    raise newException(KeyError, "key not in object")
+  obj.fields.del(key)
+
+proc copy*(p: ErlTerm): ErlTerm =
+  ## Performs a deep copy of `a`.
+  case p.kind
+  of ENil:
+      result = newENil()
+  of EBool:
+      result = newETerm(p.bval)
+  of EInt32:
+      result = newETerm(p.n32)
+  of EInt64:
+      result = newETerm(p.n64)
+  of EFloat32:
+      result = newETerm(p.f32)
+  of EFloat64:
+      result = newETerm(p.f64)
+  of EString:
+      result = newETerm(p.str)
+  of EBinary:
+      result = newETerm(p.bin)
+  of EBitBinary:
+      result = newETerm(p.bit)
+  of EPid:
+      result = newETerm(p.epid)
+  of ERef:
+      result = newETerm(p.eref)
+  of EFun:
+      result = newETerm(p.epid)
+  of EList:
+      result = newETerm(p.elems)
+  of ECharList:
+      result = newETerm(p.chars)
+  of EMap:
+      result = newETerm(p.fields)
+  of JObject:
+      result = newJObject()
+      for key, val in pairs(p.fields):
+      result.fields[key] = copy(val)
+  of JArray:
+    result = newJArray()
+    for i in items(p.elems):
+      result.elems.add(copy(i))
