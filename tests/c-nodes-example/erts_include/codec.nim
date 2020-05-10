@@ -10,20 +10,9 @@ export options
 type
   ErlAtom* = object
     val*: string
-  ErlRef* = object
-    val*: string
-  ErlPid* = object
-    val*: string
-  ErlFun* = object
-    val*: string
-  ErlCharlist* = seq[char]
   ErlKindError* = object of ValueError ## raised by the ``to`` macro if the
                                         ## JSON kind is incorrect.
   ErlParsingError* = object of ValueError ## is raised for a JSON error
-
-proc hash*(a: ErlAtom): Hash =
-  result = a.val.hash
-  result = !$result
 
 const AtomOk* = ErlAtom(val: "ok")
 const AtomNil* = ErlAtom(val: "nil")
@@ -48,9 +37,9 @@ type
     EBinary,
     # EBitBinary,
     ## Erlang Types ##
+    EPort,
     ERef,
     EPid,
-    EFun,
     ## Composite ##
     EMap,
     EList,
@@ -86,12 +75,12 @@ type
     # of EBitBinary:
       # bit*: seq[byte]
     # Erlang Types
+    of EPort:
+      eport*: ErlangPort
     of ERef:
-      eref*: ErlRef
+      eref*: ErlangRef
     of EPid:
-      epid*: ErlPid
-    of EFun:
-      efun*: ErlFun
+      epid*: ErlangPid
     # Composite
     of EMap:
       fields*: OrderedTable[ErlTerm, ErlTerm]
@@ -134,13 +123,17 @@ proc newETerm*(s: ErlAtom): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EAtom, atm: s)
 
-proc newETerm*(s: ErlPid): ErlTerm =
+proc newETerm*(s: ErlangPid): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: EPid, epid: s)
 
-proc newETerm*(s: ErlRef): ErlTerm =
+proc newETerm*(s: ErlangRef): ErlTerm =
   ## Creates a new `EString ErlTerm`.
   result = ErlTerm(kind: ERef, eref: s)
+
+proc newETerm*(s: ErlangPort): ErlTerm =
+  ## Creates a new `EString ErlTerm`.
+  result = ErlTerm(kind: EPort, eport: s)
 
 proc newETerm*(s: string): ErlTerm =
   ## Creates a new `EString ErlTerm`.
@@ -240,26 +233,26 @@ proc getBinary*(n: ErlTerm, default: seq[byte] = @[]): seq[byte] =
   if n.isNil or n.kind != EBinary: return default
   else: return n.bin
 
-proc getRef*(n: ErlTerm): Option[ErlRef] =
+proc getRef*(n: ErlTerm): Option[ErlangRef] =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != ERef: return none(ErlRef)
+  if n.isNil or n.kind != ERef: return none(ErlangRef)
   else: return some(n.eref)
 
-proc getPid*(n: ErlTerm): Option[ErlPid] =
+proc getPid*(n: ErlTerm): Option[ErlangPid] =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EPid: return none(ErlPid)
+  if n.isNil or n.kind != EPid: return none(ErlangPid)
   else: return some(n.epid)
 
-proc getFun*(n: ErlTerm): Option[ErlFun] =
+proc getPort*(n: ErlTerm): Option[ErlangPort] =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EFun: return none(ErlFun)
-  else: return some(n.efun)
+  if n.isNil or n.kind != EPid: return none(ErlangPort)
+  else: return some(n.eport)
 
 proc getMap*(n: ErlTerm,
     default = initOrderedTable[ErlTerm, ErlTerm](4)):
@@ -277,13 +270,25 @@ proc getList*(n: ErlTerm, default: seq[ErlTerm] = @[]): seq[ErlTerm] =
   if n.isNil or n.kind != EList: return default
   else: return n.elems
 
+proc getTuple*(n: ErlTerm, default: seq[ErlTerm] = @[]): seq[ErlTerm] =
+  ## Retrieves the array of a `JArray ErlTerm`.
+  ##
+  ## Returns ``default`` if ``n`` is not a ``JArray``, or if ``n`` is nil.
+  if n.isNil or n.kind != ETupleN: return default
+  else: return n.items
 
-proc hash*(n: ErlPid): Hash =
-    n.val.hash()
-proc hash*(n: ErlRef): Hash =
-    n.val.hash()
-proc hash*(n: ErlFun): Hash =
-    n.val.hash()
+proc hash*(a: ErlAtom): Hash =
+  result = a.val.hash
+  result = !$result
+
+proc hash*(n: ErlangPid): Hash =
+  result = !$(hash(n.node) !& hash(n.num) !& hash(n.serial) !& hash(n.creation))
+
+proc hash*(n: ErlangRef): Hash =
+  result = !$(hash(n.node) !& hash(n.n) !& hash(n.creation))
+
+proc hash*(n: ErlangPort): Hash =
+  result = !$(hash(n.node) !& hash(n.id) !& hash(n.creation))
 
 proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash {.noSideEffect.}
 
@@ -316,8 +321,8 @@ proc hash*(n: ErlTerm): Hash =
       result = hash(n.epid)
     of ERef:
       result = hash(n.eref)
-    of EFun:
-      result = hash(n.epid)
+    of EPort:
+      result = hash(n.eport)
     of EList:
       result = hash(n.elems)
     of ETupleN:
@@ -433,8 +438,8 @@ proc `==`*(a, b: ErlTerm): bool =
       result = a.epid == b.epid
     of ERef:
       result = a.eref == b.eref
-    of EFun:
-      result = a.efun == b.efun
+    of EPort:
+      result = a.eport == b.eport
     of ETupleN:
       result = a.items == b.items
     of EList:
@@ -574,8 +579,8 @@ proc copy*(p: ErlTerm): ErlTerm =
     result = newETerm(p.epid)
   of ERef:
     result = newETerm(p.eref)
-  of EFun:
-    result = newETerm(p.epid)
+  of EPort:
+    result = newETerm(p.eport)
   of ETupleN:
     result = newETuple()
     for i in items(p.elems):
@@ -626,29 +631,31 @@ proc hasAvailable*(ss: var ErlStream, bytes: int): bool =
   return (len(ss.data) - ss.pos) >= bytes
 
 proc toUgly*(ss: var ErlStream, node: ErlTerm) =
-  ## Converts `node` to its JSON Representation, without
+  ## Converts `ErlTerm` to its Erlang Term Representation
   
   # This should be enough for any fixed sized
   # variable lengths like binaries are checked for their length
   const minFree = 8
+  const minFreeStruct = 24
+
   ss.ensureAvailable(minFree)
 
   case node.kind:
   of EList:
-    var vals: seq[ErlTerm] = node.elems
+    var vals: seq[ErlTerm] = node.getList()
     if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "list encode error")
     for child in node.elems:
       ss.toUgly(child)
   of EMap:
-    var vals: OrderedTable[ErlTerm, ErlTerm] = getMap(node)
+    var vals: OrderedTable[ErlTerm, ErlTerm] = node.getMap()
     ss.ensureAvailable(8)
     if ei_encode_map_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "map encode error")
     for child in node.elems:
       ss.toUgly(child)
   of ETupleN:
-    var vals: seq[ErlTerm] = node.items
+    var vals: seq[ErlTerm] = node.getTuple()
     if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "list encode error")
     for child in node.elems:
@@ -664,10 +671,26 @@ proc toUgly*(ss: var ErlStream, node: ErlTerm) =
     var valAddr: cstring = cast[cstring](addr(val[0]))
     if ei_encode_string_len(addr(ss), indexAddr(ss), valAddr, val.len.cint) != 0:
       raise newException(ErlKindError, "string encode error")
-  # of EBitBinary:
-    # raise newException(ValueError, "not implemented")
-  # of ECharList:
-    # raise newException(ValueError, "not implemented")
+  of EAtom:
+    var val = node.getAtom()
+    ss.ensureAvailable(len(val.val)+minFree)
+    if ei_encode_atom_len(addr(ss), indexAddr(ss), val.val, val.val.len.cint) != 0:
+      raise newException(ErlKindError, "string encode error")
+  of ERef:
+    var val = node.eref
+    ss.ensureAvailable(minFreeStruct)
+    if ei_encode_ref(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "string encode error")
+  of EPid:
+    var val = node.epid
+    ss.ensureAvailable(minFreeStruct)
+    if ei_encode_pid(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "pid encode error")
+  of EPort:
+    var val = node.eport
+    ss.ensureAvailable(minFreeStruct)
+    if ei_encode_port(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "port encode error")
   of EInt32:
     var val = node.getInt32()
     if ei_encode_long(addr(ss), indexAddr(ss), val) != 0:
