@@ -367,20 +367,20 @@ proc `%`*(o: enum): ErlTerm =
   ## string. Creates a new ``JString ErlTerm``.
   result = %($o)
 
-proc toJson(x: NimNode): NimNode {.compileTime.} =
+proc toTerm(x: NimNode): NimNode {.compileTime.} =
   case x.kind
   of nnkBracket: # array
     if x.len == 0: return newCall(bindSym"newEList")
     result = newNimNode(nnkBracket)
     for i in 0 ..< x.len:
-      result.add(toJson(x[i]))
+      result.add(toTerm(x[i]))
     result = newCall(bindSym("%", brOpen), result)
   of nnkTableConstr: # object
     if x.len == 0: return newCall(bindSym"newEMap")
     result = newNimNode(nnkTableConstr)
     for i in 0 ..< x.len:
       x[i].expectKind nnkExprColonExpr
-      result.add newTree(nnkExprColonExpr, x[i][0], toJson(x[i][1]))
+      result.add newTree(nnkExprColonExpr, x[i][0], toTerm(x[i][1]))
     result = newCall(bindSym("%", brOpen), result)
   of nnkCurly: # empty object
     x.expectLen(0)
@@ -388,7 +388,7 @@ proc toJson(x: NimNode): NimNode {.compileTime.} =
   of nnkNilLit:
     result = newCall(bindSym"newENil")
   of nnkPar:
-    if x.len == 1: result = toJson(x[0])
+    if x.len == 1: result = toTerm(x[0])
     else: result = newCall(bindSym("%", brOpen), x)
   else:
     result = newCall(bindSym("%", brOpen), x)
@@ -396,7 +396,7 @@ proc toJson(x: NimNode): NimNode {.compileTime.} =
 macro `%*`*(x: untyped): untyped =
   ## Convert an expression to a ErlTerm directly, without having to specify
   ## `%` for every element.
-  result = toJson(x)
+  result = toTerm(x)
 
 proc `==`*(a, b: ErlTerm): bool =
   ## Check two nodes for equality
@@ -598,4 +598,59 @@ proc copy*(p: ErlTerm): ErlTerm =
       result.elems.add(copy(i))
 
 
-
+proc toUgly*(result: var string, node: ErlTerm) =
+  ## Converts `node` to its JSON Representation, without
+  ## regard for human readability. Meant to improve ``$`` string
+  ## conversion performance.
+  ##
+  ## JSON representation is stored in the passed `result`
+  ##
+  ## This provides higher efficiency than the ``pretty`` procedure as it
+  ## does **not** attempt to format the resulting JSON to make it human readable.
+  ## 
+  case p.kind
+  of ENil:
+    result = newENil()
+  of EBool:
+    result = newETerm(p.bval)
+  of EInt32:
+    result = newETerm(p.n32)
+  of EInt64:
+    result = newETerm(p.n64)
+  of EUInt32:
+    result = newETerm(p.u32)
+  of EUInt64:
+    result = newETerm(p.u64)
+  of EFloat32:
+    result = newETerm(p.f32)
+  of EFloat64:
+    result = newETerm(p.f64)
+  of EString:
+    result = newETerm(p.str)
+  of EBinary:
+    result = newETerm(p.bin)
+  of EBitBinary:
+    result = newETerm(p.bit)
+  of EAtom:
+    result = newETerm(p.atm)
+  of EPid:
+    result = newETerm(p.epid)
+  of ERef:
+    result = newETerm(p.eref)
+  of EFun:
+    result = newETerm(p.epid)
+  of ECharList:
+    result = newETerm(p.chars)
+  of ETupleN:
+    result = newETuple()
+    for i in items(p.elems):
+      result.elems.add(copy(i))
+  of Emap:
+    result = newEMap()
+    for key, val in pairs(p.fields):
+      result.fields[key] = copy(val)
+  of EList:
+    result = newEList()
+    for i in items(p.elems):
+      result.elems.add(copy(i))
+  
