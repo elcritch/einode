@@ -137,7 +137,7 @@ proc EXT_ERL_CACHED_ATOM*(): cint {.importcpp: "ERL_CACHED_ATOM@".}
 
 ## TODO: Check this on major OTP updates. They pretend this should be encapsulated/hidden.
 type 
-  ErlTypes* = enum 
+  ErlExtTypes* = enum 
     ERL_CACHED_ATOM = 'C',
     NEW_FLOAT_EXT = 'F',
     ERL_BIT_BINARY_EXT = 'M',

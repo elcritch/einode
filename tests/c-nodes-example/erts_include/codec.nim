@@ -9,17 +9,20 @@ export options
 
 type
   ErlAtom* = object
-    val*: string
+    n*: string
   ErlKindError* = object of ValueError ## raised by the ``to`` macro if the
                                         ## JSON kind is incorrect.
   ErlParsingError* = object of ValueError ## is raised for a JSON error
 
-const AtomOk* = ErlAtom(val: "ok")
-const AtomNil* = ErlAtom(val: "nil")
-const AtomError* = ErlAtom(val: "error")
-const AtomTrue* = ErlAtom(val: "true")
-const AtomFalse* = ErlAtom(val: "false")
+const AtomOk* = ErlAtom(n: "ok")
+const AtomNil* = ErlAtom(n: "nil")
+const AtomError* = ErlAtom(n: "error")
+const AtomTrue* = ErlAtom(n: "true")
+const AtomFalse* = ErlAtom(n: "false")
 
+proc newAtom(name: var string): ref ErlAtom =
+  new(result)
+  result.n = name
 
 type
   ErlTermKind* = enum ## possible JSON node types
@@ -278,7 +281,7 @@ proc getTuple*(n: ErlTerm, default: seq[ErlTerm] = @[]): seq[ErlTerm] =
   else: return n.items
 
 proc hash*(a: ErlAtom): Hash =
-  result = a.val.hash
+  result = a.n.hash
   result = !$result
 
 proc hash*(n: ErlangPid): Hash =
@@ -673,8 +676,8 @@ proc termsToBinary*(ss: var ErlStream, node: ErlTerm) =
       raise newException(ErlKindError, "string encode error")
   of EAtom:
     var val = node.getAtom()
-    ss.ensureAvailable(len(val.val)+minFree)
-    if ei_encode_atom_len(addr(ss), indexAddr(ss), val.val, val.val.len.cint) != 0:
+    ss.ensureAvailable(len(val.n)+minFree)
+    if ei_encode_atom_len(addr(ss), indexAddr(ss), val.n, val.n.len.cint) != 0:
       raise newException(ErlKindError, "string encode error")
   of ERef:
     var val = node.eref
@@ -740,84 +743,42 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
   if ei_get_type(addr(ss), indexAddr(ss), erlType.addr, erlSize.addr) != 0:
     raise newException(ErlKindError, "error parsing kind")
 
-  case erlType:
-  of ERL_SMALL_INTEGER_EXT:
-    var vals: seq[ErlTerm] = node.getList()
-    if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
-      raise newException(ErlKindError, "list encode error")
-    for child in node.elems:
-      ss.termsToBinary(child)
-  of EMap:
-    var vals: OrderedTable[ErlTerm, ErlTerm] = node.getMap()
-    ss.ensureAvailable(8)
-    if ei_encode_map_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
-      raise newException(ErlKindError, "map encode error")
-    for child in node.elems:
-      ss.termsToBinary(child)
-  of ETupleN:
-    var vals: seq[ErlTerm] = node.getTuple()
-    if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
-      raise newException(ErlKindError, "list encode error")
-    for child in node.elems:
-      ss.termsToBinary(child)
-  of EString:
-    var val: string = node.str
-    ss.ensureAvailable(len(val)+minFree)
-    if ei_encode_string_len(addr(ss), indexAddr(ss), cstring(val), val.len.cint) != 0:
-      raise newException(ErlKindError, "string encode error")
-  of EBinary:
-    var val: seq[byte] = node.bin
-    ss.ensureAvailable(len(val)+minFree)
-    var valAddr: cstring = cast[cstring](addr(val[0]))
-    if ei_encode_string_len(addr(ss), indexAddr(ss), valAddr, val.len.cint) != 0:
-      raise newException(ErlKindError, "string encode error")
-  of EAtom:
-    var val = node.getAtom()
-    ss.ensureAvailable(len(val.val)+minFree)
-    if ei_encode_atom_len(addr(ss), indexAddr(ss), val.val, val.val.len.cint) != 0:
-      raise newException(ErlKindError, "string encode error")
-  of ERef:
-    var val = node.eref
-    ss.ensureAvailable(minFreeStruct)
-    if ei_encode_ref(addr(ss), indexAddr(ss), addr(val)) != 0:
-      raise newException(ErlKindError, "string encode error")
-  of EPid:
-    var val = node.epid
-    ss.ensureAvailable(minFreeStruct)
-    if ei_encode_pid(addr(ss), indexAddr(ss), addr(val)) != 0:
-      raise newException(ErlKindError, "pid encode error")
-  of EPort:
-    var val = node.eport
-    ss.ensureAvailable(minFreeStruct)
-    if ei_encode_port(addr(ss), indexAddr(ss), addr(val)) != 0:
-      raise newException(ErlKindError, "port encode error")
-  of EInt32:
-    var val = node.getInt32()
-    if ei_encode_long(addr(ss), indexAddr(ss), val) != 0:
-      raise newException(ErlKindError, "int32 encode error")
-  of EInt64:
-    var val = node.getInt64()
-    if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
-      raise newException(ErlKindError, "int64 encode error")
-  of EUInt32:
-    var val = node.getUInt32()
-    if ei_encode_ulong(addr(ss), indexAddr(ss), val.uint32) != 0:
-      raise newException(ErlKindError, "float encode error")
-  of EUInt64:
-    var val = node.getUInt32()
-    if ei_encode_ulonglong(addr(ss), indexAddr(ss), val.uint64) != 0:
-      raise newException(ErlKindError, "float encode error")
-  of EDouble:
-    var val = node.getFloat64()
-    if ei_encode_double(addr(ss), indexAddr(ss), val) != 0:
-      raise newException(ErlKindError, "float encode error")
-  of EChar:
-    var val = node.getChar()
-    if ei_encode_boolean(addr(ss), indexAddr(ss), val.cint) != 0:
-      raise newException(ErlKindError, "float encode error")
-  of EBool:
-    var val = node.getBool()
-    if ei_encode_boolean(addr(ss), indexAddr(ss), val.cint) != 0:
-      raise newException(ErlKindError, "float encode error")
-  of ENil:
-    ss.termsToBinary(newETerm(AtomNil))
+  case ErlExtTypes(erlType):
+  of ERL_CACHED_ATOM:
+    raise newException(ErlKindError, "invalid type for c-nodes")
+  of ERL_NEW_CACHE:
+    raise newException(ErlKindError, "invalid type for c-nodes")
+  of NEW_FLOAT_EXT:
+    var val: float
+    if ei_decode_double(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing float")
+  of ERL_BIT_BINARY_EXT:
+    raise newException(ValueError, "not implemented yet")
+  of ERL_NEW_PID_EXT:
+    var val: ErlangPid
+    if ei_decode_pid(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing pid")
+  of ERL_NEW_PORT_EXT:
+    var val: ErlangPort
+    if ei_decode_port(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing port")
+  of ERL_NEWER_REFERENCE_EXT:
+    var val: ErlangRef
+    if ei_decode_ref(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing ref")
+  of ERL_SMALL_INTEGER_EXT, ERL_INTEGER_EXT:
+    var val: clong
+    if ei_decode_long(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing ref")
+  of ERL_FLOAT_EXT:
+    var val: cdouble
+    if ei_decode_double(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing ref")
+  of ERL_ATOM_EXT:
+    var val: array[MAXATOMLEN_UTF8, char]
+    if ei_decode_atom(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing ref")
+    var name: string = $val
+    result = newETerm(name)
+    
+
