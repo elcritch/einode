@@ -5,7 +5,7 @@ import os
 import posix
 import segfaults
 import net
-
+import erts_include/codec
 import erts_include/ei 
 
 const
@@ -55,7 +55,7 @@ proc main*() =
 
   ##  Connection data
   var fd = ei_accept(ec.addr, listen.getFd().cint, conn.addr)
-  if fd == ERL_ERROR():
+  if fd == ERL_ERROR:
     raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" % [repr(listen)])
 
   echo("listening on port: $1" % [$port])
@@ -70,51 +70,36 @@ proc main*() =
   ##  Lopp flag
   var loop: bool = true
   while loop:
-    var got: cint = ei_receive_msg(fd, addr(info), addr(emsg))
-    if got == ERL_TICK():
-      echo("tick: " & $got)
-    elif got == ERL_ERROR():
+    var mtype = ei_xreceive_msg(fd, addr(info), addr(emsg))
+    if mtype == ERL_TICK:
+      echo("tick: " & $mtype)
+    elif mtype == ERL_ERROR:
       echo("err: " )
       loop = false
-      raise newException(LibraryError, "erl_error: " & $got)
+      raise newException(LibraryError, "erl_error: " & $mtype)
     else:
       ##  ETERM *fromp, *tuplep, *fnp, *argp, *resp;
-      echo("message: " & $got)
-      if info.msgtype == ERL_REG_SEND():
+      echo("message: " & $mtype)
+      if info.msgtype == ERL_REG_SEND:
         var res: cint = 0
-        var version: cint
-        var arity: cint
-        var msg_atom: array[MAXATOMLEN + 1, char]
-        var msg_arg: clong
-        var pid: ErlangPid
 
         echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
                 [ $info.msgtype, $emsg.buff, $emsg.index, $emsg.buffsz])
 
-        emsg.index = 0
-        if ei_decode_version(emsg.buff, addr(emsg.index), addr(version)) < 0:
-          raise newException(LibraryError, "ignoring malformed message (bad version: $1) " % [$version])
+        var eterms: ErlTerm = binaryToTerms(emsg)
 
-        if ei_decode_tuple_header(emsg.buff, addr(emsg.index), addr(arity)) < 0:
-          raise newException(LibraryError, "ignoring malformed message (not tuple) ")
-        if arity != 3:
-          raise newException(LibraryError, "ignoring malformed message (must be a 3-arity tuple ")
-        if ei_decode_atom(emsg.buff, addr(emsg.index), msg_atom.addr) < 0:
-          raise newException(LibraryError, "ignoring malformed message (first tuple element not atom ")
-        if ei_decode_pid(emsg.buff, emsg.index.addr, pid.addr) < 0:
-          raise newException(LibraryError, "ignoring malformed message (first tuple element of second tuple element not pid) ")
-        if ei_decode_tuple_header(emsg.buff, addr(emsg.index), addr(arity)) < 0 or
-            arity != 2:
-          raise newException(LibraryError, "ignoring malformed message (second tuple element not 2-arity tuple) ")
-        if ei_decode_atom(emsg.buff, emsg.index.addr, msg_atom.addr) < 0:
-          raise newException(LibraryError, "ignoring malformed message (first message tuple element not atom) ")
-        if ei_decode_long(emsg.buff, emsg.index.addr, msg_arg.addr) < 0:
-          raise newException(LibraryError, "ignoring malformed message (second message tuple element not an int)")
-        if msg_atom == "foo":
+        echo "eterms: " & repr(eterms)
+
+        var main_msg: seq[ErlTerm] = eterms.getTuple()
+        var rpc_msg = main_msg[2].getTuple()
+        var msg_atom = rpc_msg[0].getAtom()
+        var msg_arg = rpc_msg[1].getInt32()
+
+        if msg_atom.n == "foo":
           echo( "foo: " & $msg_arg)
           res = foo(msg_arg).cint
-        if msg_atom == "foo":
-          echo( "foo: " & $msg_arg)
+        if msg_atom.n == "bar":
+          echo( "bar: " & $msg_arg)
           res = bar(msg_arg).cint
         else:
           echo("other: " & $msg_arg)

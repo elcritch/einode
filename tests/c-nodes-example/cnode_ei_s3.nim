@@ -55,7 +55,7 @@ proc main*() =
 
   ##  Connection data
   var fd = ei_accept(ec.addr, listen.getFd().cint, conn.addr)
-  if fd == ERL_ERROR():
+  if fd == ERL_ERROR:
     raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" % [repr(listen)])
 
   echo("listening on port: $1" % [$port])
@@ -71,16 +71,16 @@ proc main*() =
   var loop: bool = true
   while loop:
     var got: cint = ei_receive_msg(fd, addr(info), addr(emsg))
-    if got == ERL_TICK():
+    if got == ERL_TICK:
       echo("tick: " & $got)
-    elif got == ERL_ERROR():
+    elif got == ERL_ERROR:
       echo("err: " )
       loop = false
       raise newException(LibraryError, "erl_error: " & $got)
     else:
       ##  ETERM *fromp, *tuplep, *fnp, *argp, *resp;
       echo("message: " & $got)
-      if info.msgtype == ERL_REG_SEND():
+      if info.msgtype == ERL_REG_SEND:
         var res: cint = 0
         var version: cint
         var arity: cint
@@ -113,8 +113,8 @@ proc main*() =
         if msg_atom == "foo":
           echo( "foo: " & $msg_arg)
           res = foo(msg_arg).cint
-        if msg_atom == "foo":
-          echo( "foo: " & $msg_arg)
+        if msg_atom == "bar":
+          echo( "bar: " & $msg_arg)
           res = bar(msg_arg).cint
         else:
           echo("other: " & $msg_arg)

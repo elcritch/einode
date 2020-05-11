@@ -20,7 +20,7 @@
 
 import posix
 
-proc EI_HAVE_TIMEOUT*(): cint {.importcpp: "EI_HAVE_TIMEOUT@".}
+var EI_HAVE_TIMEOUT* {.importc: "EI_HAVE_TIMEOUT", header: "<ei.h>".}: cint
 
 ##  --------------------------------------------------------------------
 ##                       Defines part of API
@@ -32,15 +32,15 @@ proc EI_HAVE_TIMEOUT*(): cint {.importcpp: "EI_HAVE_TIMEOUT@".}
 
 ##  FIXME just a few are documented, does it mean they can't be returned?
 
-proc ERL_ERROR*(): cint {.importcpp: "ERL_ERROR@".}
-proc ERL_NO_DAEMON*(): cint {.importcpp: "ERL_NO_DAEMON@".}
-proc ERL_NO_PORT*(): cint {.importcpp: "ERL_NO_PORT@".}
-proc ERL_CONNECT_FAI*(): cint {.importcpp: "ERL_CONNECT_FAI@".}
-proc ERL_TIMEOUT*(): cint {.importcpp: "ERL_TIMEOUT@".}
-proc ERL_NO_REMOTE*(): cint {.importcpp: "ERL_NO_REMOTE@".}
-proc ERL_TICK*(): cint {.importcpp: "ERL_TICK@".}
-proc ERL_MSG*(): cint {.importcpp: "ERL_MSG@".}
-proc ERL_NO_TIMEOUT*(): cint {.importcpp: "ERL_NO_TIMEOUT@".}
+var ERL_ERROR* {.importc: "ERL_ERROR", header: "<ei.h>".}: cint
+var ERL_NO_DAEMON* {.importc: "ERL_NO_DAEMON", header: "<ei.h>".}: cint
+var ERL_NO_PORT* {.importc: "ERL_NO_PORT", header: "<ei.h>".}: cint
+var ERL_CONNECT_FAI* {.importc: "ERL_CONNECT_FAI", header: "<ei.h>".}: cint
+var ERL_TIMEOUT* {.importc: "ERL_TIMEOUT", header: "<ei.h>".}: cint
+var ERL_NO_REMOTE* {.importc: "ERL_NO_REMOTE", header: "<ei.h>".}: cint
+var ERL_TICK* {.importc: "ERL_TICK", header: "<ei.h>".}: cint
+var ERL_MSG* {.importc: "ERL_MSG", header: "<ei.h>".}: cint
+var ERL_NO_TIMEOUT* {.importc: "ERL_NO_TIMEOUT", header: "<ei.h>".}: cint
 
 # const
 #   ERL_ERROR* = -1
@@ -55,15 +55,15 @@ proc ERL_NO_TIMEOUT*(): cint {.importcpp: "ERL_NO_TIMEOUT@".}
 
 ##  these are the control message types
 
-proc ERL_LINK*(): cint {.importcpp: "ERL_LINK@".}
-proc ERL_SEND*(): cint {.importcpp: "ERL_SEND@".}
-proc ERL_EXIT*(): cint {.importcpp: "ERL_EXIT@".}
-proc ERL_UNLINK*(): cint {.importcpp: "ERL_UNLINK@".}
-proc ERL_NODE_LINK*(): cint {.importcpp: "ERL_NODE_LINK@".}
-proc ERL_REG_SEND*(): cint {.importcpp: "ERL_REG_SEND@".}
-proc ERL_GROUP_LEADER*(): cint {.importcpp: "ERL_GROUP_LEADER@".}
-proc ERL_EXIT2*(): cint {.importcpp: "ERL_EXIT2@".}
-proc ERL_PASS_THROUGH*(): cint {.importcpp: "ERL_PASS_THROUGH@".}
+var ERL_LINK* {.importc: "ERL_LINK", header: "<ei.h>".}: cint
+var ERL_SEND* {.importc: "ERL_SEND", header: "<ei.h>".}: cint
+var ERL_EXIT* {.importc: "ERL_EXIT", header: "<ei.h>".}: cint
+var ERL_UNLINK* {.importc: "ERL_UNLINK", header: "<ei.h>".}: cint
+var ERL_NODE_LINK* {.importc: "ERL_NODE_LINK", header: "<ei.h>".}: cint
+var ERL_REG_SEND* {.importc: "ERL_REG_SEND", header: "<ei.h>".}: cint
+var ERL_GROUP_LEADER* {.importc: "ERL_GROUP_LEADER", header: "<ei.h>".}: cint
+var ERL_EXIT2* {.importc: "ERL_EXIT2", header: "<ei.h>".}: cint
+var ERL_PASS_THROUGH* {.importc: "ERL_PASS_THROUGH", header: "<ei.h>".}: cint
 
 # const
 #   ERL_LINK* = 1
@@ -78,13 +78,13 @@ proc ERL_PASS_THROUGH*(): cint {.importcpp: "ERL_PASS_THROUGH@".}
 
 ##  new ones for tracing, from Kenneth
 
-proc ERL_SEND_TT*(): cint {.importcpp: "ERL_SEND_TT@".}
-proc ERL_EXIT_TT*(): cint {.importcpp: "ERL_EXIT_TT@".}
-proc ERL_REG_SEND_TT*(): cint {.importcpp: "ERL_REG_SEND_TT@".}
-proc ERL_EXIT2_TT*(): cint {.importcpp: "ERL_EXIT2_TT@".}
-proc ERL_MONITOR_P*(): cint {.importcpp: "ERL_MONITOR_P@".}
-proc ERL_DEMONITOR_P*(): cint {.importcpp: "ERL_DEMONITOR_P@".}
-proc ERL_MONITOR_P_EXIT*(): cint {.importcpp: "ERL_MONITOR_P_EXIT@".}
+var ERL_SEND_TT* {.importc: "ERL_SEND_TT", header: "<ei.h>".}: cint
+var ERL_EXIT_TT* {.importc: "ERL_EXIT_TT", header: "<ei.h>".}: cint
+var ERL_REG_SEND_TT* {.importc: "ERL_REG_SEND_TT", header: "<ei.h>".}: cint
+var ERL_EXIT2_TT* {.importc: "ERL_EXIT2_TT", header: "<ei.h>".}: cint
+var ERL_MONITOR_P* {.importc: "ERL_MONITOR_P", header: "<ei.h>".}: cint
+var ERL_DEMONITOR_P* {.importc: "ERL_DEMONITOR_P", header: "<ei.h>".}: cint
+var ERL_MONITOR_P_EXIT* {.importc: "ERL_MONITOR_P_EXIT", header: "<ei.h>".}: cint
 
 # const
 #   ERL_SEND_TT* = 12
@@ -104,36 +104,36 @@ proc ERL_MONITOR_P_EXIT*(): cint {.importcpp: "ERL_MONITOR_P_EXIT@".}
 ##
 ##  FIXME we don't want to export these.....
 
-proc EXT_ERL_SMALL_INTEGER_EXT*(): cint {.importcpp: "ERL_SMALL_INTEGER_EXT@".}
-proc EXT_ERL_INTEGER_EXT*(): cint {.importcpp: "ERL_INTEGER_EXT@".}
-proc EXT_ERL_FLOAT_EXT*(): cint {.importcpp: "ERL_FLOAT_EXT@".}
-proc EXT_NEW_FLOAT_EXT*(): cint {.importcpp: "NEW_FLOAT_EXT@".}
-proc EXT_ERL_ATOM_EXT*(): cint {.importcpp: "ERL_ATOM_EXT@".}
-proc EXT_ERL_SMALL_ATOM_EXT*(): cint {.importcpp: "ERL_SMALL_ATOM_EXT@".}
-proc EXT_ERL_ATOM_UTF8_EXT*(): cint {.importcpp: "ERL_ATOM_UTF8_EXT@".}
-proc EXT_ERL_SMALL_ATOM_UTF8_EXT*(): cint {.importcpp: "ERL_SMALL_ATOM_UTF8_EXT@".}
-proc EXT_ERL_REFERENCE_EXT*(): cint {.importcpp: "ERL_REFERENCE_EXT@".}
-proc EXT_ERL_NEW_REFERENCE_EXT*(): cint {.importcpp: "ERL_NEW_REFERENCE_EXT@".}
-proc EXT_ERL_NEWER_REFERENCE_EXT*(): cint {.importcpp: "ERL_NEWER_REFERENCE_EXT@".}
-proc EXT_ERL_PORT_EXT*(): cint {.importcpp: "ERL_PORT_EXT@".}
-proc EXT_ERL_NEW_PORT_EXT*(): cint {.importcpp: "ERL_NEW_PORT_EXT@".}
-proc EXT_ERL_PID_EXT*(): cint {.importcpp: "ERL_PID_EXT@".}
-proc EXT_ERL_NEW_PID_EXT*(): cint {.importcpp: "ERL_NEW_PID_EXT@".}
-proc EXT_ERL_SMALL_TUPLE_EXT*(): cint {.importcpp: "ERL_SMALL_TUPLE_EXT@".}
-proc EXT_ERL_LARGE_TUPLE_EXT*(): cint {.importcpp: "ERL_LARGE_TUPLE_EXT@".}
-proc EXT_ERL_NIL_EXT*(): cint {.importcpp: "ERL_NIL_EXT@".}
-proc EXT_ERL_STRING_EXT*(): cint {.importcpp: "ERL_STRING_EXT@".}
-proc EXT_ERL_LIST_EXT*(): cint {.importcpp: "ERL_LIST_EXT@".}
-proc EXT_ERL_BINARY_EXT*(): cint {.importcpp: "ERL_BINARY_EXT@".}
-proc EXT_ERL_BIT_BINARY_EXT*(): cint {.importcpp: "ERL_BIT_BINARY_EXT@".}
-proc EXT_ERL_SMALL_BIG_EXT*(): cint {.importcpp: "ERL_SMALL_BIG_EXT@".}
-proc EXT_ERL_LARGE_BIG_EXT*(): cint {.importcpp: "ERL_LARGE_BIG_EXT@".}
-proc EXT_ERL_NEW_FUN_EXT*(): cint {.importcpp: "ERL_NEW_FUN_EXT@".}
-proc EXT_ERL_MAP_EXT*(): cint {.importcpp: "ERL_MAP_EXT@".}
-proc EXT_ERL_FUN_EXT*(): cint {.importcpp: "ERL_FUN_EXT@".}
-proc EXT_ERL_EXPORT_EXT*(): cint {.importcpp: "ERL_EXPORT_EXT@".}
-proc EXT_ERL_NEW_CACHE*(): cint {.importcpp: "ERL_NEW_CACHE@".}
-proc EXT_ERL_CACHED_ATOM*(): cint {.importcpp: "ERL_CACHED_ATOM@".}
+var EXT_ERL_SMALL_INTEGER_EXT* {.importc: "ERL_SMALL_INTEGER_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_INTEGER_EXT* {.importc: "ERL_INTEGER_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_FLOAT_EXT* {.importc: "ERL_FLOAT_EXT", header: "<ei.h>".}: cint
+var EXT_NEW_FLOAT_EXT* {.importc: "NEW_FLOAT_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_ATOM_EXT* {.importc: "ERL_ATOM_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_SMALL_ATOM_EXT* {.importc: "ERL_SMALL_ATOM_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_ATOM_UTF8_EXT* {.importc: "ERL_ATOM_UTF8_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_SMALL_ATOM_UTF8_EXT* {.importc: "ERL_SMALL_ATOM_UTF8_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_REFERENCE_EXT* {.importc: "ERL_REFERENCE_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_NEW_REFERENCE_EXT* {.importc: "ERL_NEW_REFERENCE_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_NEWER_REFERENCE_EXT* {.importc: "ERL_NEWER_REFERENCE_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_PORT_EXT* {.importc: "ERL_PORT_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_NEW_PORT_EXT* {.importc: "ERL_NEW_PORT_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_PID_EXT* {.importc: "ERL_PID_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_NEW_PID_EXT* {.importc: "ERL_NEW_PID_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_SMALL_TUPLE_EXT* {.importc: "ERL_SMALL_TUPLE_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_LARGE_TUPLE_EXT* {.importc: "ERL_LARGE_TUPLE_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_NIL_EXT* {.importc: "ERL_NIL_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_STRING_EXT* {.importc: "ERL_STRING_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_LIST_EXT* {.importc: "ERL_LIST_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_BINARY_EXT* {.importc: "ERL_BINARY_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_BIT_BINARY_EXT* {.importc: "ERL_BIT_BINARY_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_SMALL_BIG_EXT* {.importc: "ERL_SMALL_BIG_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_LARGE_BIG_EXT* {.importc: "ERL_LARGE_BIG_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_NEW_FUN_EXT* {.importc: "ERL_NEW_FUN_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_MAP_EXT* {.importc: "ERL_MAP_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_FUN_EXT* {.importc: "ERL_FUN_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_EXPORT_EXT* {.importc: "ERL_EXPORT_EXT", header: "<ei.h>".}: cint
+var EXT_ERL_NEW_CACHE* {.importc: "ERL_NEW_CACHE", header: "<ei.h>".}: cint
+var EXT_ERL_CACHED_ATOM* {.importc: "ERL_CACHED_ATOM", header: "<ei.h>".}: cint
 
 ## TODO: Check this on major OTP updates. They pretend this should be encapsulated/hidden.
 type 
@@ -178,12 +178,12 @@ type
 ##  library and when using the library we set a value that we use
 ##
 
-# proc EI_MAX_COOKIE_SIZE*(): cint {.importcpp: "EI_MAX_COOKIE_SIZE@".}
-# proc MAXATOMLEN*(): cint {.importcpp: "MAXATOMLEN@".}
-# proc MAXATOMLEN_UTF8*(): cint {.importcpp: "MAXATOMLEN_UTF8@".}
-# proc EI_MAXHOSTNAMELEN*(): cint {.importcpp: "EI_MAXHOSTNAMELEN@".}
-# proc EI_MAXALIVELEN*(): cint {.importcpp: "EI_MAXALIVELEN@".}
-# proc MAXNODELEN*(): cint {.importcpp: "MAXNODELEN@".}
+# var EI_MAX_COOKIE_SIZE* {.importc: "EI_MAX_COOKIE_SIZE", header: "<ei.h>".}: cint
+# var MAXATOMLEN* {.importc: "MAXATOMLEN", header: "<ei.h>".}: cint
+# var MAXATOMLEN_UTF8* {.importc: "MAXATOMLEN_UTF8", header: "<ei.h>".}: cint
+# var EI_MAXHOSTNAMELEN* {.importc: "EI_MAXHOSTNAMELEN", header: "<ei.h>".}: cint
+# var EI_MAXALIVELEN* {.importc: "EI_MAXALIVELEN", header: "<ei.h>".}: cint
+# var MAXNODELEN* {.importc: "MAXNODELEN", header: "<ei.h>".}: cint
 
 const
   EI_MAX_COOKIE_SIZE* = 512

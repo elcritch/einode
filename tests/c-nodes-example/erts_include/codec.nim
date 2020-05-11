@@ -774,7 +774,7 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
     if ei_decode_double(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing ref")
     result = newETerm(val)
-  of ERL_ATOM_EXT, ERL_ATOM_UTF8_EXT, ERL_SMALL_ATOM_UTF8_EXT:
+  of ERL_ATOM_EXT, ERL_ATOM_UTF8_EXT, ERL_SMALL_ATOM_EXT, ERL_SMALL_ATOM_UTF8_EXT:
     var val: array[MAXATOMLEN_UTF8, char]
     var atm: ErlAtom
     if ei_decode_atom(addr(ss), indexAddr(ss), addr(val)) != 0:
@@ -835,8 +835,20 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
     result = newETerm(val)
   of ERL_SMALL_BIG_EXT, ERL_LARGE_BIG_EXT:
     raise newException(ErlKindError, "error parsing kind")
-  of ERL_NEW_FUN_EXT:
+  of ERL_NEW_FUN_EXT, ERL_FUN_EXT:
     raise newException(ErlKindError, "error parsing kind")
   of ERL_EXPORT_EXT:
     raise newException(ErlKindError, "error parsing kind")
+
+proc binaryToTerms*(emsg: EiBuff): ErlTerm =
+  var ss: ErlStream
+  ss.data = newString(emsg.buffsz)
+  copyMem(cstring(ss.data), emsg.buff, emsg.buffsz)
+  ss.pos = 0
+
+  var version: cint = 0
+  # Check for version
+  discard ei_decode_version(addr(ss), indexAddr(ss), addr(version))
+    
+  binaryToTerms(ss)
 
