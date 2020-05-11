@@ -104,68 +104,71 @@ proc ERL_MONITOR_P_EXIT*(): cint {.importcpp: "ERL_MONITOR_P_EXIT@".}
 ##
 ##  FIXME we don't want to export these.....
 
-proc ERL_SMALL_INTEGER_EXT*(): cint {.importcpp: "ERL_SMALL_INTEGER_EXT@".}
-proc ERL_INTEGER_EXT*(): cint {.importcpp: "ERL_INTEGER_EXT@".}
-proc ERL_FLOAT_EXT*(): cint {.importcpp: "ERL_FLOAT_EXT@".}
-proc NEW_FLOAT_EXT*(): cint {.importcpp: "NEW_FLOAT_EXT@".}
-proc ERL_ATOM_EXT*(): cint {.importcpp: "ERL_ATOM_EXT@".}
-proc ERL_SMALL_ATOM_EXT*(): cint {.importcpp: "ERL_SMALL_ATOM_EXT@".}
-proc ERL_ATOM_UTF8_EXT*(): cint {.importcpp: "ERL_ATOM_UTF8_EXT@".}
-proc ERL_SMALL_ATOM_UTF8_EXT*(): cint {.importcpp: "ERL_SMALL_ATOM_UTF8_EXT@".}
-proc ERL_REFERENCE_EXT*(): cint {.importcpp: "ERL_REFERENCE_EXT@".}
-proc ERL_NEW_REFERENCE_EXT*(): cint {.importcpp: "ERL_NEW_REFERENCE_EXT@".}
-proc ERL_NEWER_REFERENCE_EXT*(): cint {.importcpp: "ERL_NEWER_REFERENCE_EXT@".}
-proc ERL_PORT_EXT*(): cint {.importcpp: "ERL_PORT_EXT@".}
-proc ERL_NEW_PORT_EXT*(): cint {.importcpp: "ERL_NEW_PORT_EXT@".}
-proc ERL_PID_EXT*(): cint {.importcpp: "ERL_PID_EXT@".}
-proc ERL_NEW_PID_EXT*(): cint {.importcpp: "ERL_NEW_PID_EXT@".}
-proc ERL_SMALL_TUPLE_EXT*(): cint {.importcpp: "ERL_SMALL_TUPLE_EXT@".}
-proc ERL_LARGE_TUPLE_EXT*(): cint {.importcpp: "ERL_LARGE_TUPLE_EXT@".}
-proc ERL_NIL_EXT*(): cint {.importcpp: "ERL_NIL_EXT@".}
-proc ERL_STRING_EXT*(): cint {.importcpp: "ERL_STRING_EXT@".}
-proc ERL_LIST_EXT*(): cint {.importcpp: "ERL_LIST_EXT@".}
-proc ERL_BINARY_EXT*(): cint {.importcpp: "ERL_BINARY_EXT@".}
-proc ERL_BIT_BINARY_EXT*(): cint {.importcpp: "ERL_BIT_BINARY_EXT@".}
-proc ERL_SMALL_BIG_EXT*(): cint {.importcpp: "ERL_SMALL_BIG_EXT@".}
-proc ERL_LARGE_BIG_EXT*(): cint {.importcpp: "ERL_LARGE_BIG_EXT@".}
-proc ERL_NEW_FUN_EXT*(): cint {.importcpp: "ERL_NEW_FUN_EXT@".}
-proc ERL_MAP_EXT*(): cint {.importcpp: "ERL_MAP_EXT@".}
-proc ERL_FUN_EXT*(): cint {.importcpp: "ERL_FUN_EXT@".}
-proc ERL_EXPORT_EXT*(): cint {.importcpp: "ERL_EXPORT_EXT@".}
-proc ERL_NEW_CACHE*(): cint {.importcpp: "ERL_NEW_CACHE@".}
-proc ERL_CACHED_ATOM*(): cint {.importcpp: "ERL_CACHED_ATOM@".}
+proc EXT_ERL_SMALL_INTEGER_EXT*(): cint {.importcpp: "ERL_SMALL_INTEGER_EXT@".}
+proc EXT_ERL_INTEGER_EXT*(): cint {.importcpp: "ERL_INTEGER_EXT@".}
+proc EXT_ERL_FLOAT_EXT*(): cint {.importcpp: "ERL_FLOAT_EXT@".}
+proc EXT_NEW_FLOAT_EXT*(): cint {.importcpp: "NEW_FLOAT_EXT@".}
+proc EXT_ERL_ATOM_EXT*(): cint {.importcpp: "ERL_ATOM_EXT@".}
+proc EXT_ERL_SMALL_ATOM_EXT*(): cint {.importcpp: "ERL_SMALL_ATOM_EXT@".}
+proc EXT_ERL_ATOM_UTF8_EXT*(): cint {.importcpp: "ERL_ATOM_UTF8_EXT@".}
+proc EXT_ERL_SMALL_ATOM_UTF8_EXT*(): cint {.importcpp: "ERL_SMALL_ATOM_UTF8_EXT@".}
+proc EXT_ERL_REFERENCE_EXT*(): cint {.importcpp: "ERL_REFERENCE_EXT@".}
+proc EXT_ERL_NEW_REFERENCE_EXT*(): cint {.importcpp: "ERL_NEW_REFERENCE_EXT@".}
+proc EXT_ERL_NEWER_REFERENCE_EXT*(): cint {.importcpp: "ERL_NEWER_REFERENCE_EXT@".}
+proc EXT_ERL_PORT_EXT*(): cint {.importcpp: "ERL_PORT_EXT@".}
+proc EXT_ERL_NEW_PORT_EXT*(): cint {.importcpp: "ERL_NEW_PORT_EXT@".}
+proc EXT_ERL_PID_EXT*(): cint {.importcpp: "ERL_PID_EXT@".}
+proc EXT_ERL_NEW_PID_EXT*(): cint {.importcpp: "ERL_NEW_PID_EXT@".}
+proc EXT_ERL_SMALL_TUPLE_EXT*(): cint {.importcpp: "ERL_SMALL_TUPLE_EXT@".}
+proc EXT_ERL_LARGE_TUPLE_EXT*(): cint {.importcpp: "ERL_LARGE_TUPLE_EXT@".}
+proc EXT_ERL_NIL_EXT*(): cint {.importcpp: "ERL_NIL_EXT@".}
+proc EXT_ERL_STRING_EXT*(): cint {.importcpp: "ERL_STRING_EXT@".}
+proc EXT_ERL_LIST_EXT*(): cint {.importcpp: "ERL_LIST_EXT@".}
+proc EXT_ERL_BINARY_EXT*(): cint {.importcpp: "ERL_BINARY_EXT@".}
+proc EXT_ERL_BIT_BINARY_EXT*(): cint {.importcpp: "ERL_BIT_BINARY_EXT@".}
+proc EXT_ERL_SMALL_BIG_EXT*(): cint {.importcpp: "ERL_SMALL_BIG_EXT@".}
+proc EXT_ERL_LARGE_BIG_EXT*(): cint {.importcpp: "ERL_LARGE_BIG_EXT@".}
+proc EXT_ERL_NEW_FUN_EXT*(): cint {.importcpp: "ERL_NEW_FUN_EXT@".}
+proc EXT_ERL_MAP_EXT*(): cint {.importcpp: "ERL_MAP_EXT@".}
+proc EXT_ERL_FUN_EXT*(): cint {.importcpp: "ERL_FUN_EXT@".}
+proc EXT_ERL_EXPORT_EXT*(): cint {.importcpp: "ERL_EXPORT_EXT@".}
+proc EXT_ERL_NEW_CACHE*(): cint {.importcpp: "ERL_NEW_CACHE@".}
+proc EXT_ERL_CACHED_ATOM*(): cint {.importcpp: "ERL_CACHED_ATOM@".}
 
-# const
-#   ERL_SMALL_INTEGER_EXT* = 'a'
-#   ERL_INTEGER_EXT* = 'b'
-#   ERL_FLOAT_EXT* = 'c'
-#   NEW_FLOAT_EXT* = 'F'
-#   ERL_ATOM_EXT* = 'd'
-#   ERL_SMALL_ATOM_EXT* = 's'
-#   ERL_ATOM_UTF8_EXT* = 'v'
-#   ERL_SMALL_ATOM_UTF8_EXT* = 'w'
-#   ERL_REFERENCE_EXT* = 'e'
-#   ERL_NEW_REFERENCE_EXT* = 'r'
-#   ERL_NEWER_REFERENCE_EXT* = 'Z'
-#   ERL_PORT_EXT* = 'f'
-#   ERL_NEW_PORT_EXT* = 'Y'
-#   ERL_PID_EXT* = 'g'
-#   ERL_NEW_PID_EXT* = 'X'
-#   ERL_SMALL_TUPLE_EXT* = 'h'
-#   ERL_LARGE_TUPLE_EXT* = 'i'
-#   ERL_NIL_EXT* = 'j'
-#   ERL_STRING_EXT* = 'k'
-#   ERL_LIST_EXT* = 'l'
-#   ERL_BINARY_EXT* = 'm'
-#   ERL_BIT_BINARY_EXT* = 'M'
-#   ERL_SMALL_BIG_EXT* = 'n'
-#   ERL_LARGE_BIG_EXT* = 'o'
-#   ERL_NEW_FUN_EXT* = 'p'
-#   ERL_MAP_EXT* = 't'
-#   ERL_FUN_EXT* = 'u'
-#   ERL_EXPORT_EXT* = 'q'
-#   ERL_NEW_CACHE* = 'N'
-#   ERL_CACHED_ATOM* = 'C'
+## TODO: Check this on major OTP updates. They pretend this should be encapsulated/hidden.
+type 
+  ErlTypes* = enum 
+    ERL_CACHED_ATOM = 'C',
+    NEW_FLOAT_EXT = 'F',
+    ERL_BIT_BINARY_EXT = 'M',
+    ERL_NEW_CACHE = 'N',
+    ERL_NEW_PID_EXT = 'X',
+    ERL_NEW_PORT_EXT = 'Y',
+    ERL_NEWER_REFERENCE_EXT = 'Z',
+    ERL_SMALL_INTEGER_EXT = 'a',
+    ERL_INTEGER_EXT = 'b',
+    ERL_FLOAT_EXT = 'c',
+    ERL_ATOM_EXT = 'd',
+    ERL_REFERENCE_EXT = 'e',
+    ERL_PORT_EXT = 'f',
+    ERL_PID_EXT = 'g',
+    ERL_SMALL_TUPLE_EXT = 'h',
+    ERL_LARGE_TUPLE_EXT = 'i',
+    ERL_NIL_EXT = 'j',
+    ERL_STRING_EXT = 'k',
+    ERL_LIST_EXT = 'l',
+    ERL_BINARY_EXT = 'm',
+    ERL_SMALL_BIG_EXT = 'n',
+    ERL_LARGE_BIG_EXT = 'o',
+    ERL_NEW_FUN_EXT = 'p',
+    ERL_EXPORT_EXT = 'q',
+    ERL_NEW_REFERENCE_EXT = 'r',
+    ERL_SMALL_ATOM_EXT = 's',
+    ERL_MAP_EXT = 't',
+    ERL_FUN_EXT = 'u',
+    ERL_ATOM_UTF8_EXT = 'v',
+    ERL_SMALL_ATOM_UTF8_EXT = 'w'
+    ## /* c nodes don't know these two */ ##
 
 ##  --------------------------------------------------------------------
 ##                       Type definitions

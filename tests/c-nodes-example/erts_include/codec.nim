@@ -630,7 +630,7 @@ proc available*(ss: var ErlStream): int =
 proc hasAvailable*(ss: var ErlStream, bytes: int): bool =
   return (len(ss.data) - ss.pos) >= bytes
 
-proc toUgly*(ss: var ErlStream, node: ErlTerm) =
+proc termsToBinary*(ss: var ErlStream, node: ErlTerm) =
   ## Converts `ErlTerm` to its Erlang Term Representation
   
   # This should be enough for any fixed sized
@@ -646,20 +646,20 @@ proc toUgly*(ss: var ErlStream, node: ErlTerm) =
     if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "list encode error")
     for child in node.elems:
-      ss.toUgly(child)
+      ss.termsToBinary(child)
   of EMap:
     var vals: OrderedTable[ErlTerm, ErlTerm] = node.getMap()
     ss.ensureAvailable(8)
     if ei_encode_map_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "map encode error")
     for child in node.elems:
-      ss.toUgly(child)
+      ss.termsToBinary(child)
   of ETupleN:
     var vals: seq[ErlTerm] = node.getTuple()
     if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "list encode error")
     for child in node.elems:
-      ss.toUgly(child)
+      ss.termsToBinary(child)
   of EString:
     var val: string = node.str
     ss.ensureAvailable(len(val)+minFree)
@@ -720,9 +720,104 @@ proc toUgly*(ss: var ErlStream, node: ErlTerm) =
     if ei_encode_boolean(addr(ss), indexAddr(ss), val.cint) != 0:
       raise newException(ErlKindError, "float encode error")
   of ENil:
-    ss.toUgly(newETerm(AtomNil))
+    ss.termsToBinary(newETerm(AtomNil))
 
-proc toUgly*(node: ErlTerm) =
+proc termsToBinary*(node: ErlTerm) =
   let capacity = 128
   var ss = newErlStream(capacity)
-  toUgly(ss, node)
+  termsToBinary(ss, node)
+
+proc binaryToTerms*(ss: var ErlStream): ErlTerm =
+
+  # Returns the type in *type and size in *size of the encoded term. For strings and atoms, 
+  # size is the number of characters not including the terminating NULL. For binaries and
+  # bitstrings, *size is the number of bytes. For lists, tuples and maps, *size is the arity
+  # of the object. For other types, *size is 0. In all cases, index is left unchanged.
+
+  var erlType: cint = 0
+  var erlSize: cint = 0
+
+  if ei_get_type(addr(ss), indexAddr(ss), erlType.addr, erlSize.addr) != 0:
+    raise newException(ErlKindError, "error parsing kind")
+
+  case erlType:
+  of ERL_SMALL_INTEGER_EXT:
+    var vals: seq[ErlTerm] = node.getList()
+    if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
+      raise newException(ErlKindError, "list encode error")
+    for child in node.elems:
+      ss.termsToBinary(child)
+  of EMap:
+    var vals: OrderedTable[ErlTerm, ErlTerm] = node.getMap()
+    ss.ensureAvailable(8)
+    if ei_encode_map_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
+      raise newException(ErlKindError, "map encode error")
+    for child in node.elems:
+      ss.termsToBinary(child)
+  of ETupleN:
+    var vals: seq[ErlTerm] = node.getTuple()
+    if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
+      raise newException(ErlKindError, "list encode error")
+    for child in node.elems:
+      ss.termsToBinary(child)
+  of EString:
+    var val: string = node.str
+    ss.ensureAvailable(len(val)+minFree)
+    if ei_encode_string_len(addr(ss), indexAddr(ss), cstring(val), val.len.cint) != 0:
+      raise newException(ErlKindError, "string encode error")
+  of EBinary:
+    var val: seq[byte] = node.bin
+    ss.ensureAvailable(len(val)+minFree)
+    var valAddr: cstring = cast[cstring](addr(val[0]))
+    if ei_encode_string_len(addr(ss), indexAddr(ss), valAddr, val.len.cint) != 0:
+      raise newException(ErlKindError, "string encode error")
+  of EAtom:
+    var val = node.getAtom()
+    ss.ensureAvailable(len(val.val)+minFree)
+    if ei_encode_atom_len(addr(ss), indexAddr(ss), val.val, val.val.len.cint) != 0:
+      raise newException(ErlKindError, "string encode error")
+  of ERef:
+    var val = node.eref
+    ss.ensureAvailable(minFreeStruct)
+    if ei_encode_ref(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "string encode error")
+  of EPid:
+    var val = node.epid
+    ss.ensureAvailable(minFreeStruct)
+    if ei_encode_pid(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "pid encode error")
+  of EPort:
+    var val = node.eport
+    ss.ensureAvailable(minFreeStruct)
+    if ei_encode_port(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "port encode error")
+  of EInt32:
+    var val = node.getInt32()
+    if ei_encode_long(addr(ss), indexAddr(ss), val) != 0:
+      raise newException(ErlKindError, "int32 encode error")
+  of EInt64:
+    var val = node.getInt64()
+    if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
+      raise newException(ErlKindError, "int64 encode error")
+  of EUInt32:
+    var val = node.getUInt32()
+    if ei_encode_ulong(addr(ss), indexAddr(ss), val.uint32) != 0:
+      raise newException(ErlKindError, "float encode error")
+  of EUInt64:
+    var val = node.getUInt32()
+    if ei_encode_ulonglong(addr(ss), indexAddr(ss), val.uint64) != 0:
+      raise newException(ErlKindError, "float encode error")
+  of EDouble:
+    var val = node.getFloat64()
+    if ei_encode_double(addr(ss), indexAddr(ss), val) != 0:
+      raise newException(ErlKindError, "float encode error")
+  of EChar:
+    var val = node.getChar()
+    if ei_encode_boolean(addr(ss), indexAddr(ss), val.cint) != 0:
+      raise newException(ErlKindError, "float encode error")
+  of EBool:
+    var val = node.getBool()
+    if ei_encode_boolean(addr(ss), indexAddr(ss), val.cint) != 0:
+      raise newException(ErlKindError, "float encode error")
+  of ENil:
+    ss.termsToBinary(newETerm(AtomNil))
