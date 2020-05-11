@@ -84,7 +84,7 @@ proc main*() =
         var res: cint = 0
         var version: cint
         var arity: cint
-        var msg_atom: array[MAXATOMLEN + 1, char]
+        var msg_atom = newString(MAXATOMLEN + 1)
         var msg_arg: clong
         var pid: ErlangPid
 
@@ -99,29 +99,38 @@ proc main*() =
           raise newException(LibraryError, "ignoring malformed message (not tuple) ")
         if arity != 3:
           raise newException(LibraryError, "ignoring malformed message (must be a 3-arity tuple ")
-        if ei_decode_atom(emsg.buff, addr(emsg.index), msg_atom.addr) < 0:
+        if ei_decode_atom(emsg.buff, addr(emsg.index), cstring(msg_atom)) < 0:
           raise newException(LibraryError, "ignoring malformed message (first tuple element not atom ")
         if ei_decode_pid(emsg.buff, emsg.index.addr, pid.addr) < 0:
           raise newException(LibraryError, "ignoring malformed message (first tuple element of second tuple element not pid) ")
         if ei_decode_tuple_header(emsg.buff, addr(emsg.index), addr(arity)) < 0 or
             arity != 2:
           raise newException(LibraryError, "ignoring malformed message (second tuple element not 2-arity tuple) ")
-        if ei_decode_atom(emsg.buff, emsg.index.addr, msg_atom.addr) < 0:
+        if ei_decode_atom(emsg.buff, emsg.index.addr, cstring(msg_atom)) < 0:
           raise newException(LibraryError, "ignoring malformed message (first message tuple element not atom) ")
         if ei_decode_long(emsg.buff, emsg.index.addr, msg_arg.addr) < 0:
           raise newException(LibraryError, "ignoring malformed message (second message tuple element not an int)")
-        if msg_atom == "foo":
+
+        var fname: string = $(cstring(msg_atom))
+        echo( "fname: " & fname)
+        echo( "fname:len: " & $len(fname))
+        echo( "fname:type: " & $typeof(fname))
+        echo( "fname:repr: " & repr(fname))
+        echo( "fname:foo: " & "foo")
+
+        if fname == "foo":
           echo( "foo: " & $msg_arg)
           res = foo(msg_arg).cint
-        if msg_atom == "bar":
+        if fname == "bar":
           echo( "bar: " & $msg_arg)
           res = bar(msg_arg).cint
         else:
           echo("other: " & $msg_arg)
+          echo("other message: " & fname)
           echo("other message: " & $msg_atom)
 
         x_out.index = 0
-        discard ei_x_format(addr(x_out), "{cnode,~i}", msg_arg)
+        discard ei_x_format(addr(x_out), "{cnode,~i}", res)
         discard ei_send(fd, addr(info.`from`), x_out.buff, x_out.index)
         ##  erl_free_term(argp);
 
