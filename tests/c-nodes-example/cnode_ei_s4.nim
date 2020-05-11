@@ -91,6 +91,9 @@ proc main*() =
         echo "eterms: " & repr(eterms)
 
         var main_msg: seq[ErlTerm] = eterms.getTuple()
+        echo "main_msg:len: " & $len(main_msg)
+        echo "main_msg:repr: " & repr(main_msg)
+
         var rpc_msg = main_msg[2].getTuple()
         var msg_atom = rpc_msg[0].getAtom()
         var msg_arg = rpc_msg[1].getInt32()

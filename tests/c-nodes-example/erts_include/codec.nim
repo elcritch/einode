@@ -338,12 +338,17 @@ proc hash*(n: OrderedTable[ErlTerm, ErlTerm]): Hash =
     result = result xor (hash(key) !& hash(val))
   result = !$result
 
-proc add*(father, child: ErlTerm) =
+proc addTuple*(father, child: ErlTerm) =
   ## Adds `child` to a JArray node `father`.
-  assert father.kind == EList
+  assert father.kind == ETupleN 
+  father.items.add(child)
+
+proc addList*(father, child: ErlTerm) =
+  ## Adds `child` to a JArray node `father`.
+  assert father.kind == EList 
   father.elems.add(child)
 
-proc add*(obj: ErlTerm, key: ErlTerm, val: ErlTerm) =
+proc addKeyValue*(obj: ErlTerm, key: ErlTerm, val: ErlTerm) =
   ## Sets a field from a `JObject`.
   assert obj.kind == EMap
   obj.fields[key] = val
@@ -800,9 +805,10 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
     var arity: cint
     if ei_decode_tuple_header(addr(ss), indexAddr(ss), addr(arity)) != 0:
       raise newException(ErlKindError, "error parsing tuple")
-    var val = newETuple()
+    result = newETuple()
     for i in 1..arity:
-      val.add(binaryToTerms(ss))
+      echo "tuple: " & $i
+      result.addTuple(binaryToTerms(ss))
   of ERL_NIL_EXT:
     if ei_skip_term(addr(ss), indexAddr(ss)) != 0:
       raise newException(ErlKindError, "error parsing ref")
@@ -816,18 +822,18 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
     var arity: cint
     if ei_decode_list_header(addr(ss), indexAddr(ss), addr(arity)) != 0:
       raise newException(ErlKindError, "error parsing tuple")
-    var val = newEList()
+    result = newEList()
     for i in 1..arity:
-      val.add(binaryToTerms(ss))
+      result.addList(binaryToTerms(ss))
   of ERL_MAP_EXT:
     var arity: cint
     if ei_decode_map_header(addr(ss), indexAddr(ss), addr(arity)) != 0:
       raise newException(ErlKindError, "error parsing map")
-    var val = newEMap()
+    result = newEMap()
     for i in 1..arity:
       var k = binaryToTerms(ss)
       var v = binaryToTerms(ss)
-      val.add(k, v)
+      result.addKeyValue(k, v)
   of ERL_BINARY_EXT:
     var val = newSeq[byte](erlSize.int)
     if ei_decode_string(addr(ss), indexAddr(ss), cast[cstring](addr(val[0]))) != 0:
@@ -841,7 +847,7 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
     raise newException(ErlKindError, "error parsing kind")
 
 proc binaryToTerms*(emsg: EiBuff): ErlTerm =
-  var ss: ErlStream
+  var ss = new(ErlStream)
   ss.data = newString(emsg.buffsz)
   copyMem(cstring(ss.data), emsg.buff, emsg.buffsz)
   ss.pos = 0
