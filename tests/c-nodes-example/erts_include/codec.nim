@@ -769,22 +769,27 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
     if ei_decode_port(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing port")
     result = newETerm(val)
-  of ERL_SMALL_INTEGER_EXT, ERL_INTEGER_EXT:
+  of ERL_SMALL_INTEGER_EXT:
     var val: clong
     if ei_decode_long(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing ints")
-    result = newETerm(val)
+    result = newETerm(val.int32)
+  of ERL_INTEGER_EXT:
+    var val: clonglong
+    if ei_decode_longlong(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing ints")
+    result = newETerm(val.int64)
   of ERL_FLOAT_EXT:
     var val: cdouble
     if ei_decode_double(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing ref")
     result = newETerm(val)
   of ERL_ATOM_EXT, ERL_ATOM_UTF8_EXT, ERL_SMALL_ATOM_EXT, ERL_SMALL_ATOM_UTF8_EXT:
-    var val: array[MAXATOMLEN_UTF8, char]
+    var val = newString(MAXATOMLEN_UTF8+1)
     var atm: ErlAtom
-    if ei_decode_atom(addr(ss), indexAddr(ss), addr(val)) != 0:
+    if ei_decode_atom(addr(ss), indexAddr(ss), cstring(val)) != 0:
       raise newException(ErlKindError, "error parsing atom")
-    atm.n = $val
+    atm.n = $cstring(val)
     result = newETerm(atm)
   of ERL_REFERENCE_EXT, ERL_NEW_REFERENCE_EXT, ERL_NEWER_REFERENCE_EXT:
     var val: ErlangRef
@@ -807,7 +812,7 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
       raise newException(ErlKindError, "error parsing tuple")
     result = newETuple()
     for i in 1..arity:
-      echo "tuple: " & $i
+      echo "erl_small_tuple_ext: " & $i
       result.addTuple(binaryToTerms(ss))
   of ERL_NIL_EXT:
     if ei_skip_term(addr(ss), indexAddr(ss)) != 0:

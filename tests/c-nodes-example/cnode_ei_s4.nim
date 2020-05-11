@@ -98,6 +98,10 @@ proc main*() =
         var msg_atom = rpc_msg[0].getAtom()
         var msg_arg = rpc_msg[1].getInt32()
 
+        echo "rpc_msg:repr: " & repr(rpc_msg)
+        echo "msg_atom:repr: " & repr(msg_atom)
+        echo "msg_arg:repr: " & repr(msg_arg)
+
         if msg_atom.n == "foo":
           echo( "foo: " & $msg_arg)
           res = foo(msg_arg).cint
@@ -109,7 +113,7 @@ proc main*() =
           echo("other message: " & $msg_atom)
 
         x_out.index = 0
-        discard ei_x_format(addr(x_out), "{cnode,~i}", msg_arg)
+        discard ei_x_format(addr(x_out), "{cnode,~i}", res)
         discard ei_send(fd, addr(info.`from`), x_out.buff, x_out.index)
         ##  erl_free_term(argp);
 
