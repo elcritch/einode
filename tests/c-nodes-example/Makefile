@@ -45,8 +45,11 @@ nim_s3:
 		--debugger:native \
 		cnode_ei_s3.nim 
 
+		# -d:traceArc \
+
 nim_s4:
 	nim c --d:debug \
+		--gc:arc \
 		--passC=-I"$(INCLUDE_DIR)" \
 		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
 		--debugger:native \
