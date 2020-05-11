@@ -764,26 +764,79 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
     if ei_decode_port(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing port")
     result = newETerm(val)
-  of ERL_NEWER_REFERENCE_EXT:
-    var val: ErlangRef
-    if ei_decode_ref(addr(ss), indexAddr(ss), addr(val)) != 0:
-      raise newException(ErlKindError, "error parsing ref")
-    result = newETerm(val)
   of ERL_SMALL_INTEGER_EXT, ERL_INTEGER_EXT:
     var val: clong
     if ei_decode_long(addr(ss), indexAddr(ss), addr(val)) != 0:
-      raise newException(ErlKindError, "error parsing ref")
+      raise newException(ErlKindError, "error parsing ints")
     result = newETerm(val)
   of ERL_FLOAT_EXT:
     var val: cdouble
     if ei_decode_double(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing ref")
     result = newETerm(val)
-  of ERL_ATOM_EXT:
+  of ERL_ATOM_EXT, ERL_ATOM_UTF8_EXT, ERL_SMALL_ATOM_UTF8_EXT:
     var val: array[MAXATOMLEN_UTF8, char]
+    var atm: ErlAtom
     if ei_decode_atom(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing atom")
+    atm.n = $val
+    result = newETerm(atm)
+  of ERL_REFERENCE_EXT, ERL_NEW_REFERENCE_EXT, ERL_NEWER_REFERENCE_EXT:
+    var val: ErlangRef
+    if ei_decode_ref(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing ext")
+    result = newETerm(val)
+  of ERL_PORT_EXT:
+    var val: ErlangPort
+    if ei_decode_port(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing port")
+    result = newETerm(val)
+  of ERL_PID_EXT:
+    var val: ErlangPid
+    if ei_decode_pid(addr(ss), indexAddr(ss), addr(val)) != 0:
+      raise newException(ErlKindError, "error parsing pid")
+    result = newETerm(val)
+  of ERL_SMALL_TUPLE_EXT, ERL_LARGE_TUPLE_EXT:
+    var arity: cint
+    if ei_decode_tuple_header(addr(ss), indexAddr(ss), addr(arity)) != 0:
+      raise newException(ErlKindError, "error parsing tuple")
+    var val = newETuple()
+    for i in 1..arity:
+      val.add(binaryToTerms(ss))
+  of ERL_NIL_EXT:
+    if ei_skip_term(addr(ss), indexAddr(ss)) != 0:
       raise newException(ErlKindError, "error parsing ref")
-    var name: string = $val
-    result = newETerm(newAtom(name))
-    
+    result = newENil()
+  of ERL_STRING_EXT:
+    var val = newString(erlSize.int)
+    if ei_decode_string(addr(ss), indexAddr(ss), cstring(val)) != 0:
+      raise newException(ErlKindError, "error parsing string")
+    result = newETerm($val)
+  of ERL_LIST_EXT:
+    var arity: cint
+    if ei_decode_list_header(addr(ss), indexAddr(ss), addr(arity)) != 0:
+      raise newException(ErlKindError, "error parsing tuple")
+    var val = newEList()
+    for i in 1..arity:
+      val.add(binaryToTerms(ss))
+  of ERL_MAP_EXT:
+    var arity: cint
+    if ei_decode_map_header(addr(ss), indexAddr(ss), addr(arity)) != 0:
+      raise newException(ErlKindError, "error parsing map")
+    var val = newEMap()
+    for i in 1..arity:
+      var k = binaryToTerms(ss)
+      var v = binaryToTerms(ss)
+      val.add(k, v)
+  of ERL_BINARY_EXT:
+    var val = newSeq[byte](erlSize.int)
+    if ei_decode_string(addr(ss), indexAddr(ss), cast[cstring](addr(val[0]))) != 0:
+      raise newException(ErlKindError, "error parsing binary")
+    result = newETerm(val)
+  of ERL_SMALL_BIG_EXT, ERL_LARGE_BIG_EXT:
+    raise newException(ErlKindError, "error parsing kind")
+  of ERL_NEW_FUN_EXT:
+    raise newException(ErlKindError, "error parsing kind")
+  of ERL_EXPORT_EXT:
+    raise newException(ErlKindError, "error parsing kind")
 
