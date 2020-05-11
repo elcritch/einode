@@ -20,7 +20,7 @@ const AtomError* = ErlAtom(n: "error")
 const AtomTrue* = ErlAtom(n: "true")
 const AtomFalse* = ErlAtom(n: "false")
 
-proc newAtom(name: string): ErlAtom =
+proc newErlAtom*(name: string): ErlAtom =
   result.n = name
 
 type
@@ -153,13 +153,25 @@ proc newETuple*(): ErlTerm =
   ## Creates a new `JObject ErlTerm`
   result = ErlTerm(kind: ETupleN, items: @[])
 
+proc newETuple*(items: seq[ErlTerm]): ErlTerm =
+  ## Creates a new `JObject ErlTerm`
+  result = ErlTerm(kind: ETupleN, items: items)
+
 proc newEList*(): ErlTerm =
+  ## Creates a new `JObject ErlTerm`
+  result = ErlTerm(kind: EList, elems: @[])
+
+proc newEList*(elems: seq[ErlTerm]): ErlTerm =
   ## Creates a new `JObject ErlTerm`
   result = ErlTerm(kind: EList, elems: @[])
 
 proc newEMap*(): ErlTerm =
   ## Creates a new `JObject ErlTerm`
   result = ErlTerm(kind: EMap, fields: initOrderedTable[ErlTerm, ErlTerm](4))
+
+proc newEAtom*(s: string): ErlTerm =
+  ## Creates a new `ENil ErlTerm`.
+  result = ErlTerm(kind: EAtom, atm: newErlAtom(s))
 
 proc newENil*(): ErlTerm =
   ## Creates a new `ENil ErlTerm`.
@@ -617,13 +629,20 @@ type
 proc newErlStream*(capacity: int): ErlStream =
   new(result)
   result.data = newString(capacity)
-  zeroMem(addr(result.data), capacity) 
+  # zeroMem(addr(result.data), capacity) 
+  # echo "newErlStream: capacity: " & $capacity
+  # echo "newErlStream: repr: " & $len(result.data)
+  # for i in 0..<capacity:
+    # result.data.add("a")
   result.pos = 0
 
 proc ensureAvailable*(ss: ErlStream, count: int) =
-  var ydata = newString(2 * ss.data.len())
-  copyMem(addr(ydata), addr(ss.data), ss.pos) 
-  ss.data = ydata
+  # echo "ensureAvailable:ss: size: " & $len(ss.data) & " pos: " & $ss.pos & " for count: " & $count
+  if count >= ss.data.len() - ss.pos:
+    # echo "ensureAvailable:ss: expand to: "  & $(2*ss.data.len())
+    var ydata = newString(2 * ss.data.len())
+    copyMem(addr(ydata), addr(ss.data), ss.pos) 
+    ss.data = ydata
 
 proc `addr`*(ss: var ErlStream): cstring =
   return cstring(ss.data)
@@ -642,9 +661,10 @@ proc termsToBinary*(ss: var ErlStream, node: ErlTerm) =
   
   # This should be enough for any fixed sized
   # variable lengths like binaries are checked for their length
-  const minFree = 8
+  const minFree = 16
   const minFreeStruct = 24
 
+  # echo "termsToBinary: " & repr(node.kind)
   ss.ensureAvailable(minFree)
 
   case node.kind:
@@ -663,9 +683,9 @@ proc termsToBinary*(ss: var ErlStream, node: ErlTerm) =
       ss.termsToBinary(child)
   of ETupleN:
     var vals: seq[ErlTerm] = node.getTuple()
-    if ei_encode_list_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
+    if ei_encode_tuple_header(addr(ss), indexAddr(ss), vals.len.cint) != 0:
       raise newException(ErlKindError, "list encode error")
-    for child in node.elems:
+    for child in vals:
       ss.termsToBinary(child)
   of EString:
     var val: string = node.str
@@ -729,10 +749,20 @@ proc termsToBinary*(ss: var ErlStream, node: ErlTerm) =
   of ENil:
     ss.termsToBinary(newETerm(AtomNil))
 
-proc termsToBinary*(node: ErlTerm) =
-  let capacity = 128
+proc termToBinary*(node: ErlTerm; capacity: int = 128): ErlStream =
   var ss = newErlStream(capacity)
+
+  # echo "ei_encode_version"
+  # echo "ei_encode_version:repr: " & repr(ss)
+  # echo "ei_encode_version:len(data): " & $len(cstring(ss.data))
+
+  if ei_encode_version(addr(ss), indexAddr(ss)) != 0:
+    raise newException(ErlKindError, "version encode error")
+
+  # echo "termToBinary"
   termsToBinary(ss, node)
+  # echo "termToBinary: done"
+  return ss
 
 proc binaryToTerms*(ss: var ErlStream): ErlTerm =
 
@@ -812,7 +842,7 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
       raise newException(ErlKindError, "error parsing tuple")
     result = newETuple()
     for i in 1..arity:
-      echo "erl_small_tuple_ext: " & $i
+      # echo "erl_small_tuple_ext: " & $i
       result.addTuple(binaryToTerms(ss))
   of ERL_NIL_EXT:
     if ei_skip_term(addr(ss), indexAddr(ss)) != 0:

@@ -59,11 +59,10 @@ proc main*() =
     raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" % [repr(listen)])
 
   echo("listening on port: $1" % [$port])
-  echo("Connected to $1" % [$conn.nodename])
+  echo("Connected to `$1`" % [ $(cast[cstring](conn.nodename[0].addr))])
 
   var info: ErlangMsg
   var emsg: EiBuff
-  var x_out: EiBuff
 
   discard new_ei_x_size(emsg.addr, 128)
 
@@ -88,33 +87,39 @@ proc main*() =
 
         var eterms: ErlTerm = binaryToTerms(emsg)
 
-        echo "eterms: " & repr(eterms)
+        # echo "eterms: " & repr(eterms)
 
         var main_msg: seq[ErlTerm] = eterms.getTuple()
-        echo "main_msg:len: " & $len(main_msg)
-        echo "main_msg:repr: " & repr(main_msg)
+        # echo "main_msg:len: " & $len(main_msg)
+        # echo "main_msg:repr: " & repr(main_msg)
 
         var rpc_msg = main_msg[2].getTuple()
         var msg_atom = rpc_msg[0].getAtom()
         var msg_arg = rpc_msg[1].getInt32()
 
-        echo "rpc_msg:repr: " & repr(rpc_msg)
-        echo "msg_atom:repr: " & repr(msg_atom)
-        echo "msg_arg:repr: " & repr(msg_arg)
+        # echo "rpc_msg:repr: " & repr(rpc_msg)
+        # echo "msg_atom:repr: " & repr(msg_atom)
+        # echo "msg_arg:repr: " & repr(msg_arg)
 
         if msg_atom.n == "foo":
           echo( "foo: " & $msg_arg)
           res = foo(msg_arg).cint
-        if msg_atom.n == "bar":
+        elif msg_atom.n == "bar":
           echo( "bar: " & $msg_arg)
           res = bar(msg_arg).cint
         else:
           echo("other: " & $msg_arg)
           echo("other message: " & $msg_atom)
 
-        x_out.index = 0
-        discard ei_x_format(addr(x_out), "{cnode,~i}", res)
-        discard ei_send(fd, addr(info.`from`), x_out.buff, x_out.index)
+        var rmsg = newETuple(@[newEAtom("cnode"), newETerm(res)])
+        var ssout = termToBinary(rmsg)
+
+        # echo "ssout:len: " & $(ssout.pos)
+        # echo "ssout:repr: " & repr(ssout)
+        # echo "ssout:done: " 
+        # discard ei_x_format(addr(x_out), "{cnode,~i}", res)
+        # discard ei_send(fd, addr(info.`from`), x_out.buff, x_out.index)
+        discard ei_send(fd, addr(info.`from`), ssout.data, ssout.pos)
         ##  erl_free_term(argp);
 
 
