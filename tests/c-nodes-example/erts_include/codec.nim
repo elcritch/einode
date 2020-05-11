@@ -20,8 +20,7 @@ const AtomError* = ErlAtom(n: "error")
 const AtomTrue* = ErlAtom(n: "true")
 const AtomFalse* = ErlAtom(n: "false")
 
-proc newAtom(name: var string): ref ErlAtom =
-  new(result)
+proc newAtom(name: string): ErlAtom =
   result.n = name
 
 type
@@ -752,33 +751,39 @@ proc binaryToTerms*(ss: var ErlStream): ErlTerm =
     var val: float
     if ei_decode_double(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing float")
+    result = newETerm(val)
   of ERL_BIT_BINARY_EXT:
     raise newException(ValueError, "not implemented yet")
   of ERL_NEW_PID_EXT:
     var val: ErlangPid
     if ei_decode_pid(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing pid")
+    result = newETerm(val)
   of ERL_NEW_PORT_EXT:
     var val: ErlangPort
     if ei_decode_port(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing port")
+    result = newETerm(val)
   of ERL_NEWER_REFERENCE_EXT:
     var val: ErlangRef
     if ei_decode_ref(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing ref")
+    result = newETerm(val)
   of ERL_SMALL_INTEGER_EXT, ERL_INTEGER_EXT:
     var val: clong
     if ei_decode_long(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing ref")
+    result = newETerm(val)
   of ERL_FLOAT_EXT:
     var val: cdouble
     if ei_decode_double(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing ref")
+    result = newETerm(val)
   of ERL_ATOM_EXT:
     var val: array[MAXATOMLEN_UTF8, char]
     if ei_decode_atom(addr(ss), indexAddr(ss), addr(val)) != 0:
       raise newException(ErlKindError, "error parsing ref")
     var name: string = $val
-    result = newETerm(name)
+    result = newETerm(newAtom(name))
     
 
