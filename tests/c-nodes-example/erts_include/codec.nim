@@ -195,15 +195,19 @@ proc getInt32*(n: ErlTerm, default: int32 = 0): int32 =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EInt32: return default
-  else: return n.n32
+  if n.isNil: return default
+  elif n.kind == EInt32: return n.n32
+  elif n.kind == EInt64: return n.n64.int32 # possible overflow? 
+  else: return default
 
 proc getInt64*(n: ErlTerm, default: int64 = 0): int64 =
   ## Retrieves the string value of a `JString ErlTerm`.
   ##
   ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EInt64: return default
-  else: return n.n64
+  if n.isNil: return default
+  elif n.kind == EInt32: return n.n32.int64
+  elif n.kind == EInt64: return n.n64 # possible overflow? 
+  else: return default
 
 proc getUInt32*(n: ErlTerm, default: uint32 = 0): uint32 =
   ## Retrieves the string value of a `JString ErlTerm`.
