@@ -90,7 +90,7 @@ proc main*() =
         var res: cint = 0
 
         echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
-                [ $info.msgtype, $emsg.buff, $emsg.index, $emsg.buffsz])
+                [ $info.msgtype, $(cast[seq[byte]](emsg.buff)), $emsg.index, $emsg.buffsz])
 
         var eterms: ErlTerm = binaryToTerms(emsg)
 
