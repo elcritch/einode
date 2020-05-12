@@ -38,16 +38,16 @@ cclient:
 		complex.c cnode_c.c \
 		-lerl_interface -lei -lpthread
 
-nim_server4:
+nim_server3:
 	nim c --d:debug \
 		--passC=-I"$(INCLUDE_DIR)" \
 		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
 		--debugger:native \
-		cnode_ei_s3.nim 
+		cnode_ei_server3.nim 
 
 		# -d:traceArc \
 
-nim_client4:
+nim_server4:
 	nim c --d:debug \
 		--gc:arc \
 		--passC=-I"$(INCLUDE_DIR)" \
@@ -55,7 +55,7 @@ nim_client4:
 		--debugger:native \
 		cnode_ei_server4.nim 
 
-nim_s5:
+nim_client4:
 	nim c --d:debug \
 		--gc:arc \
 		--passC=-I"$(INCLUDE_DIR)" \
