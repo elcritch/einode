@@ -29,9 +29,7 @@ type
     EBool,
     EChar,
     EInt32,
-    EUInt32,
     EInt64,
-    EUInt64,
     EDouble,
     EAtom,
     ## Erlang Types ##
@@ -111,11 +109,11 @@ proc newETerm*(n: int64): ErlTerm =
 
 proc newETerm*(n: uint32): ErlTerm =
   ## Creates a new `EInt ErlTerm`.
-  result = ErlTerm(kind: EUInt32, u32: n)
+  result = ErlTerm(kind: EInt32, n32: n.int32)
 
 proc newETerm*(n: uint64): ErlTerm =
   ## Creates a new `EInt ErlTerm`.
-  result = ErlTerm(kind: EUInt64, u64: n)
+  result = ErlTerm(kind: EInt64, n64: n.int64)
 
 proc newETerm*(n: float64): ErlTerm =
   ## Creates a new `EFloat ErlTerm`.
@@ -208,20 +206,6 @@ proc getInt64*(n: ErlTerm, default: int64 = 0): int64 =
   elif n.kind == EInt32: return n.n32.int64
   elif n.kind == EInt64: return n.n64 # possible overflow? 
   else: return default
-
-proc getUInt32*(n: ErlTerm, default: uint32 = 0): uint32 =
-  ## Retrieves the string value of a `JString ErlTerm`.
-  ##
-  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EUInt32: return default
-  else: return n.u32
-
-proc getUInt64*(n: ErlTerm, default: uint64 = 0): uint64 =
-  ## Retrieves the string value of a `JString ErlTerm`.
-  ##
-  ## Returns ``default`` if ``n`` is not a ``JString``, or if ``n`` is nil.
-  if n.isNil or n.kind != EUInt64: return default
-  else: return n.u64
 
 proc getFloat64*(n: ErlTerm, default: float64 = 0): float64 =
   ## Retrieves the string value of a `JString ErlTerm`.
@@ -325,10 +309,6 @@ proc hash*(n: ErlTerm): Hash =
       result = hash(n.n64)
     of EDouble:
       result = hash(n.f64)
-    of EUInt32:
-      result = hash(n.u32)
-    of EUInt64:
-      result = hash(n.u64)
     of EString:
       result = hash(n.str)
     of EBinary:
@@ -445,10 +425,6 @@ proc `==`*(a, b: ErlTerm): bool =
       result = a.n32 == b.n32
     of EInt64:
       result = a.n64 == b.n64
-    of EUInt32:
-      result = a.u32 == b.u32
-    of EUInt64:
-      result = a.u64 == b.u64
     of EDouble:
       result = a.f64 == b.f64
     of EString:
@@ -730,14 +706,6 @@ proc termsToBinary*(ss: var ErlStream, node: ErlTerm) =
     var val = node.getInt64()
     if ei_encode_longlong(addr(ss), indexAddr(ss), val) != 0:
       raise newException(ErlKindError, "int64 encode error")
-  of EUInt32:
-    var val = node.getUInt32()
-    if ei_encode_ulong(addr(ss), indexAddr(ss), val.uint32) != 0:
-      raise newException(ErlKindError, "float encode error")
-  of EUInt64:
-    var val = node.getUInt32()
-    if ei_encode_ulonglong(addr(ss), indexAddr(ss), val.uint64) != 0:
-      raise newException(ErlKindError, "float encode error")
   of EDouble:
     var val = node.getFloat64()
     if ei_encode_double(addr(ss), indexAddr(ss), val) != 0:
