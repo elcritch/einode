@@ -32,7 +32,7 @@ proc main*() =
   var port: Port = Port(parseInt($(arguments[0])))
   var node_name =
     if len(arguments) == 2:
-      arguments[0]
+      arguments[1]
     else:
       "cnode1"
 
