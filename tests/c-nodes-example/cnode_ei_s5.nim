@@ -76,29 +76,19 @@ proc main*() =
       loop = false
       raise newException(LibraryError, "erl_error: " & $mtype)
     else:
-      ##  ETERM *fromp, *tuplep, *fnp, *argp, *resp;
       echo("message: " & $mtype)
       if info.msgtype == ERL_REG_SEND:
         var res: cint = 0
 
         echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
-                [ $info.msgtype, $emsg.buff, $emsg.index, $emsg.buffsz])
+                [ $info.msgtype, $repr(emsg.buff), $emsg.index, $emsg.buffsz])
 
         var eterms: ErlTerm = binaryToTerms(emsg)
-
-        # echo "eterms: " & repr(eterms)
-
         var main_msg: seq[ErlTerm] = eterms.getTuple()
-        # echo "main_msg:len: " & $len(main_msg)
-        # echo "main_msg:repr: " & repr(main_msg)
 
         var rpc_msg = main_msg[2].getTuple()
         var msg_atom = rpc_msg[0].getAtom()
         var msg_arg = rpc_msg[1].getInt32()
-
-        # echo "rpc_msg:repr: " & repr(rpc_msg)
-        # echo "msg_atom:repr: " & repr(msg_atom)
-        # echo "msg_arg:repr: " & repr(msg_arg)
 
         if msg_atom.n == "foo":
           echo( "foo: " & $msg_arg)
@@ -113,13 +103,7 @@ proc main*() =
         var rmsg = newETuple(@[newEAtom("cnode"), newETerm(res)])
         var ssout = termToBinary(rmsg)
 
-        # echo "ssout:len: " & $(ssout.pos)
-        # echo "ssout:repr: " & repr(ssout)
-        # echo "ssout:done: " 
-        # discard ei_x_format(addr(x_out), "{cnode,~i}", res)
-        # discard ei_send(fd, addr(info.`from`), x_out.buff, x_out.index)
         discard ei_send(fd, addr(info.`from`), ssout.data, ssout.pos)
-        ##  erl_free_term(argp);
 
 
 proc new_ei_x_size(x: ptr EiBuff; size: int): cint =
