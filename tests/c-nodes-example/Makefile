@@ -53,7 +53,7 @@ nim_s4:
 		--passC=-I"$(INCLUDE_DIR)" \
 		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
 		--debugger:native \
-		cnode_ei_s4.nim 
+		cnode_ei_server4.nim 
 
 nim_s5:
 	nim c --d:debug \
@@ -61,5 +61,5 @@ nim_s5:
 		--passC=-I"$(INCLUDE_DIR)" \
 		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
 		--debugger:native \
-		cnode_ei_s5.nim 
+		cnode_ei_client4.nim 
 
