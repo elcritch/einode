@@ -55,3 +55,11 @@ nim_s4:
 		--debugger:native \
 		cnode_ei_s4.nim 
 
+nim_s5:
+	nim c --d:debug \
+		--gc:arc \
+		--passC=-I"$(INCLUDE_DIR)" \
+		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
+		--debugger:native \
+		cnode_ei_s5.nim 
+
