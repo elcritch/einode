@@ -30,6 +30,11 @@ proc my_listen(port: Port): Socket =
 proc main*() =
   let arguments = commandLineParams()
   var port: Port = Port(parseInt($(arguments[0])))
+  var node_name =
+    if len(arguments) == 2:
+      arguments[0]
+    else:
+      "cnode1"
 
   echo("starting: " )
 
@@ -41,8 +46,11 @@ proc main*() =
 
   var ec: EiCnode
 
-  if ei_connect_xinit(ec.addr, "alpha", "cnode", "cnode@127.0.0.1", node_addr.addr,
-                     "secretcookie", 0) < 0:
+  if ei_connect_xinit(ec.addr, "alpha",
+                      node_name,
+                      node_name & "@127.0.0.1",
+                      node_addr.addr,
+                      "secretcookie", 0) < 0:
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
   ##  Listen socket

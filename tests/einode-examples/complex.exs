@@ -1,14 +1,14 @@
 defmodule Complex4 do
 
-	def foo(x, id \\ 1) do
-	  call_cnode({:foo, x}, id)
+	def foo(x, server_id \\ 1) do
+	  call_cnode({:foo, x}, server_id)
 	end
 
-	def bar(y, id \\ 1) do
-	  call_cnode({:bar, y}, id)
+	def bar(y, server_id \\ 1) do
+	  call_cnode({:bar, y}, server_id)
 	end
 
-	def call_cnode(msg, id) do
+	def call_cnode(msg, server_id) do
 		{:any, :'cnode#{id}@127.0.0.1'}
 		|> send({:call, self(), msg})
 

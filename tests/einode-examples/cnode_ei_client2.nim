@@ -31,7 +31,11 @@ proc main*() =
 
   var ec: EiCnode
 
-  if ei_connect_xinit(ec.addr, "alpha", node_name, node_name & "@127.0.0.1", node_addr.addr,
+  if ei_connect_xinit(ec.addr,
+                      "alpha",
+                      node_name,
+                      node_name & "@127.0.0.1",
+                      node_addr.addr,
                      "secretcookie", 0) < 0:
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
