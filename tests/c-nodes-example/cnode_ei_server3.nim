@@ -6,7 +6,7 @@ import posix
 import segfaults
 import net
 
-import erts_include/ei 
+import einode/ei 
 
 const
   BUFSIZE* = 1000

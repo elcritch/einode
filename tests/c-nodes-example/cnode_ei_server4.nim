@@ -5,8 +5,8 @@ import os
 import posix
 import segfaults
 import net
-import erts_include/codec
-import erts_include/ei 
+import einode/codec
+import einode/ei 
 
 const
   BUFSIZE* = 1000

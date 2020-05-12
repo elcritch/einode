@@ -5,8 +5,8 @@ import os
 import posix
 import segfaults
 import net
-import erts_include/codec
-import erts_include/ei 
+import einode/codec
+import einode/ei 
 
 const
   BUFSIZE* = 1000
@@ -26,7 +26,7 @@ proc main*() =
   discard ei_init()
 
   var node_addr: InAddr
-  ##  32-bit IP number of host
+  ## 32-bit IP number of host
   node_addr.s_addr = inet_addr("127.0.0.1")
 
   var ec: EiCnode
