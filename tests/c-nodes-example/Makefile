@@ -7,6 +7,7 @@ LIB_DIR=$(ERTS)/lib
 
 all: cserver cserver2 cserver_ei3 cclient nim
 
+## Should move these to use rules, but ain't nobody got time 
 cserver:
 	gcc -o cserver \
 		-Wno-implicit-function-declaration \
@@ -65,5 +66,5 @@ nim_client4:
 
 
 clean:
-	rm -Rf cclient cserver cserver2 cnode_ei_client4 cnode_ei_server4
+	rm -Rf cclient cserver cserver2 cnode_ei_server3 cnode_ei_client4 cnode_ei_server4
 	rm -Rf cclient cnode_ei_s3 cnode_ei_s4 cnode_ei_s5 cserver cserver2 cserver_ei3
