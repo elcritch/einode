@@ -19,20 +19,10 @@ proc foo*(x: int): int =
 proc bar*(y: int): int =
     return y * 2
 
-proc my_listen*(port: Port): Socket =
-  var socket = newSocket()
-  socket.bindAddr(port, address="")
-  socket.setSockOpt(OptReuseAddr, true)
-  socket.setSockOpt(OptKeepAlive, true)
-  socket.listen()
-  return socket
-
 proc main*() =
   let arguments = commandLineParams()
-  var port: Port = Port(parseInt($(arguments[0])))
-
+  var node_name = arguments[0]
   echo("starting: " )
-
   discard ei_init()
 
   var node_addr: InAddr
@@ -41,7 +31,7 @@ proc main*() =
 
   var ec: EiCnode
 
-  if ei_connect_xinit(ec.addr, "alpha", "cnode", "cnode@127.0.0.1", node_addr.addr,
+  if ei_connect_xinit(ec.addr, "alpha", node_name, node_name & "@127.0.0.1", node_addr.addr,
                      "secretcookie", 0) < 0:
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
@@ -80,8 +70,8 @@ proc main*() =
       if info.msgtype == ERL_REG_SEND:
         var res: cint = 0
 
-        echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
-                [ $info.msgtype, $repr(emsg.buff), $emsg.index, $emsg.buffsz])
+        echo("erl_reg_send: msgtype: $1 idx: $2 bufsz: $3 " %
+                [ $info.msgtype, $emsg.index, $emsg.buffsz])
 
         var eterms: ErlTerm = binaryToTerms(emsg)
         var main_msg: seq[ErlTerm] = eterms.getTuple()

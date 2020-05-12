@@ -19,7 +19,7 @@ proc foo*(x: int): int =
 proc bar*(y: int): int =
     return y * 2
 
-proc my_listen*(port: Port): Socket =
+proc my_listen(port: Port): Socket =
   var socket = newSocket()
   socket.bindAddr(port, address="")
   socket.setSockOpt(OptReuseAddr, true)
