@@ -69,3 +69,4 @@ clean:
 	rm -Rf cclient cserver cserver2 cnode_ei_server3 cnode_ei_client4 cnode_ei_server4
 	rm -Rf cclient cnode_ei_s3 cnode_ei_s4 cnode_ei_s5 cserver cserver2 cserver_ei3
 	rm -Rf *.dSYM # macos
+	rm -Rf *.beam 
