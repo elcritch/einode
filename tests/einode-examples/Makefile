@@ -8,61 +8,30 @@ LIB_DIR=$(ERTS)/lib
 all: cserver cserver2 cserver_ei3 cclient nim
 
 ## Should move these to use rules, but ain't nobody got time 
-cserver:
-	gcc -o cserver \
-		-Wno-implicit-function-declaration \
-		-Wno-deprecated-declarations \
-		-I$(INCLUDE_DIR) -L$(LIB_DIR) \
-		complex.c cnode_s.c \
-		-lerl_interface -lei -lpthread
-
-cserver2:
-	gcc -o cserver2 \
-		-Wno-implicit-function-declaration \
-		-Wno-deprecated-declarations \
-		-I$(INCLUDE_DIR) -L$(LIB_DIR) \
-		complex.c cnode_s2.c \
-		-lerl_interface -lei -lpthread
-
-cserver_ei3:
-	gcc -o cserver_ei3 \
-		-Wno-implicit-function-declaration \
-		-I$(INCLUDE_DIR) -L$(LIB_DIR) \
-		complex.c cnode_ei_s2.c \
-		-lerl_interface -lei -lpthread
-
-cclient:
-	gcc -o cclient \
-		-Wno-implicit-function-declaration \
-		-Wno-deprecated-declarations \
-		-I$(INCLUDE_DIR) -L$(LIB_DIR) \
-		complex.c cnode_c.c \
-		-lerl_interface -lei -lpthread
-
-nim_server3:
+nim_server1:
 	nim c --d:debug \
 		--passC=-I"$(INCLUDE_DIR)" \
 		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
 		--debugger:native \
-		cnode_ei_server3.nim 
+		cnode_ei_server1.nim 
 
 		# -d:traceArc \
 
-nim_server4:
+nim_server2:
 	nim c --d:debug \
 		--gc:arc \
 		--passC=-I"$(INCLUDE_DIR)" \
 		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
 		--debugger:native \
-		cnode_ei_server4.nim 
+		cnode_ei_server2.nim 
 
-nim_client4:
+nim_client2:
 	nim c --d:debug \
 		--gc:arc \
 		--passC=-I"$(INCLUDE_DIR)" \
 		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
 		--debugger:native \
-		cnode_ei_client4.nim 
+		cnode_ei_client2.nim 
 
 
 clean:
