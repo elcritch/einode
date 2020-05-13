@@ -13,12 +13,18 @@ export ei
 
 type
   EiNode* = ref object
+    name: string
+    ip: string
+    cookie: string
+    alivename: string 
     ec*: EiCnode
     port*: Port
     listen*: Option[Socket]
     conn*: ErlConnect
     fd*: cint
     loop*: bool
+    # info: ErlangMsg
+    # emsg: EiBuff
 
 
 proc newEiNode*(
@@ -29,22 +35,27 @@ proc newEiNode*(
     alivename: string = "alpha"): EiNode =
 
   new(result)
+  result.name = name
+  result.alivename = alivename
+  result.cookie = cookie
+  result.ip = ip
   result.port = port
   result.loop = true
 
+proc initialize*(einode: var EiNode) =
   # creates a new EiNode 
   echo "start server"
   discard ei_init()
 
   var node_addr: InAddr
-  var alive: string = alivename
+  var alive: string = einode.alivename
   ##  32-bit IP number of host
-  node_addr.s_addr = inet_addr(ip)
+  node_addr.s_addr = inet_addr(einode.ip)
 
-  if ei_connect_xinit(result.ec.addr,
+  if ei_connect_xinit(einode.ec.addr,
                       cstring(alive),
-                      name,
-                      name & "@" & ip,
+                      einode.name,
+                      einode.name & "@" & einode.ip,
                       node_addr.addr,
                       "secretcookie", 0) < 0:
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
@@ -82,36 +93,53 @@ template connectServer*(einode: var EiNode, server_node: string, body: untyped) 
       echo "connected with fd: " & $einode.fd
       connected = true
 
+proc new_ei_x_size(x: ptr EiBuff; size: int): cint =
+  # x.buff = cast[cstring](ei_malloc(size))
+  x.buff = cast[cstring](alloc(size))
+  x.buffsz = size.cint
+  x.index = 0
+  return if x.buff != nil: 0 else: -1
+
 iterator receive*(einode: var EiNode;
                   size: int = 128;
                   ignoreTick = true;
                   raiseOnError = true):
             tuple[mtype: cint, info: ErlangMsg, eterm: ErlTerm] =
 
+  var fd = einode.fd
   var info = ErlangMsg()
   var emsg = EiBuff()
+
+  # discard new_ei_x_size(emsg.addr, 128)
 
   emsg.buff = cast[cstring](alloc(size))
   emsg.buffsz = size.cint
   emsg.index = 0
 
-
+  echo( "ERL_TICK: " & $ERL_TICK)
+  echo( "ERL_ERROR: " & $ERL_ERROR)
+  echo( "ERL_REG_SEND: " & $ERL_REG_SEND)
+  
   while einode.loop:
-    echo "xreceive"
-    var mtype = ei_xreceive_msg(einode.fd, addr(info), addr(emsg))
+    echo "\nxreceive:start"
+    var mtype = ei_xreceive_msg(fd, addr(info), addr(emsg))
+    echo "xreceive:done"
 
     echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
-          [ $info.msgtype, $(cast[seq[byte]](emsg.buff)), $emsg.index, $emsg.buffsz])
-
+          [ $info.msgtype, $(repr(emsg.buff)), $emsg.index, $emsg.buffsz])
+    echo("receive => ")
     if mtype == ERL_TICK:
+      echo("receive: tick")
       if ignoreTick:
         continue
     elif mtype == ERL_ERROR:
+      echo("receive: error")
       if raiseOnError:
         raise newException(LibraryError, "erl_error: " & $mtype)
       else:
         yield (mtype, info, binaryToTerms(emsg))
-    elif mtype == ERL_ERROR:
+    else:
+      echo("receive: message: ")
       yield (mtype, info, binaryToTerms(emsg))
 
 

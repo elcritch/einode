@@ -21,7 +21,9 @@ proc main*() =
   echo("starting: " )
   var einode = newEiNode(node_name, "127.0.0.1", cookie = "secretcookie")
 
-  ##  Listen socket
+  einode.initialize()
+
+  ##  Connect to server
   var server_node = "e1@127.0.0.1"
   einode.connectServer(server_node):
     echo("Warning: unable to connect to node: " & server_node)
