@@ -270,7 +270,7 @@ type
     `func`* {.importc: "func".}: cstring
     func_allocated* {.importc: "func_allocated".}: cint
 
-  INNER_C_UNION_ei_279* {.importc: "no_name", header: "ei.h", bycopy.} = object {.union.}
+  INNER_C_UNION_ei_279* {.importc: "no_name", header: "ei.h", bycopy, union.} = object
     closure* {.importc: "closure".}: INNER_C_STRUCT_ei_280
     exprt* {.importc: "exprt".}: INNER_C_STRUCT_ei_290
 
@@ -284,7 +284,7 @@ type
 ##  a big
 
 type
-  INNER_C_UNION_ei_308* {.importc: "no_name", header: "ei.h", bycopy.} = object {.union.}
+  INNER_C_UNION_ei_308* {.importc: "no_name", header: "ei.h", bycopy, union.} = object 
     i_val* {.importc: "i_val".}: clong
     d_val* {.importc: "d_val".}: cdouble
     atom_name* {.importc: "atom_name".}: array[MAXATOMLEN_UTF8, char]
@@ -560,12 +560,12 @@ proc ei_x_encode_atom_len_as*(x: ptr EiBuff; s: cstring; len: cint;
     importc: "ei_x_encode_atom_len_as", header: "ei.h".}
 proc ei_encode_binary*(buf: cstring; index: ptr cint; p: pointer; len: clong): cint {.
     cdecl, importc: "ei_encode_binary", header: "ei.h".}
-proc ei_encode_bitstring*(buf: cstring; index: ptr cint; p: cstring; bitoffs: csize;
-                         bits: csize): cint {.cdecl, importc: "ei_encode_bitstring",
+proc ei_encode_bitstring*(buf: cstring; index: ptr cint; p: cstring; bitoffs: cint;
+                         bits: cint): cint {.cdecl, importc: "ei_encode_bitstring",
     header: "ei.h".}
 proc ei_x_encode_binary*(x: ptr EiBuff; s: pointer; len: cint): cint {.cdecl,
     importc: "ei_x_encode_binary", header: "ei.h".}
-proc ei_x_encode_bitstring*(x: ptr EiBuff; p: cstring; bitoffs: csize; bits: csize): cint {.
+proc ei_x_encode_bitstring*(x: ptr EiBuff; p: cstring; bitoffs: cint; bits: cint): cint {.
     cdecl, importc: "ei_x_encode_bitstring", header: "ei.h".}
 proc ei_encode_pid*(buf: cstring; index: ptr cint; p: ptr ErlangPid): cint {.cdecl,
     importc: "ei_encode_pid", header: "ei.h".}
@@ -649,7 +649,7 @@ proc ei_decode_atom_as*(buf: cstring; index: ptr cint; p: cstring; destlen: cint
 proc ei_decode_binary*(buf: cstring; index: ptr cint; p: pointer; len: ptr clong): cint {.
     cdecl, importc: "ei_decode_binary", header: "ei.h".}
 proc ei_decode_bitstring*(buf: cstring; index: ptr cint; pp: cstringArray;
-                         bitoffsp: ptr cuint; nbitsp: ptr csize): cint {.cdecl,
+                         bitoffsp: ptr cuint; nbitsp: ptr cint): cint {.cdecl,
     importc: "ei_decode_bitstring", header: "ei.h".}
 proc ei_decode_fun*(buf: cstring; index: ptr cint; p: ptr erlang_fun): cint {.cdecl,
     importc: "ei_decode_fun", header: "ei.h".}
@@ -756,7 +756,7 @@ const
 ##  --------------------------------------------------------------------
 
 type
-  INNER_C_UNION_ei_681* {.importc: "no_name", header: "ei.h", bycopy.} = object {.union.}
+  INNER_C_UNION_ei_681* {.importc: "no_name", header: "ei.h", bycopy, union.} = object 
     i* {.importc: "i".}: clong
     f* {.importc: "f".}: cdouble
     s* {.importc: "s".}: cstring
