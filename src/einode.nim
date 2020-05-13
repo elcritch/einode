@@ -88,8 +88,8 @@ iterator receive*(einode: var EiNode;
                   raiseOnError = true):
             tuple[mtype: cint, info: ErlangMsg, eterm: ErlTerm] =
 
-  var info: ErlangMsg
-  var emsg: EiBuff
+  var info = ErlangMsg()
+  var emsg = EiBuff()
 
   emsg.buff = cast[cstring](alloc(size))
   emsg.buffsz = size.cint
