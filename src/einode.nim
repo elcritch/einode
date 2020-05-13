@@ -116,30 +116,22 @@ iterator receive*(einode: var EiNode;
   emsg.buffsz = size.cint
   emsg.index = 0
 
-  echo( "ERL_TICK: " & $ERL_TICK)
-  echo( "ERL_ERROR: " & $ERL_ERROR)
-  echo( "ERL_REG_SEND: " & $ERL_REG_SEND)
-  
   while einode.loop:
-    echo "\nxreceive:start"
     var mtype = ei_xreceive_msg(fd, addr(info), addr(emsg))
-    echo "xreceive:done"
 
     echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
           [ $info.msgtype, $(repr(emsg.buff)), $emsg.index, $emsg.buffsz])
-    echo("receive => ")
+
     if mtype == ERL_TICK:
-      echo("receive: tick")
       if ignoreTick:
         continue
     elif mtype == ERL_ERROR:
-      echo("receive: error")
       if raiseOnError:
         raise newException(LibraryError, "erl_error: " & $mtype)
       else:
         yield (mtype, info, binaryToTerms(emsg))
     else:
-      echo("receive: message: ")
+        # ERL_REG_SEND
       yield (mtype, info, binaryToTerms(emsg))
 
 
