@@ -20,6 +20,7 @@ defmodule Complex do
       after
          2_000 ->
             IO.puts("error: timeout")
+            raise "timeout error"
      end
    end
 
