@@ -10,8 +10,6 @@ const
   BUFSIZE* = 1000
 
 # proc ei_malloc(size: clong): pointer
-proc new_ei_x_size*(x: ptr EiBuff; size: clong): cint
-
 proc foo*(x: int): int =
     return x + 1
 proc bar*(y: int): int =
@@ -62,13 +60,6 @@ proc main*() =
 
       einode.send(to = info.`from`, msg = rmsg)
 
-
-proc new_ei_x_size(x: ptr EiBuff; size: int): cint =
-  # x.buff = cast[cstring](ei_malloc(size))
-  x.buff = cast[cstring](alloc(size))
-  x.buffsz = size.cint
-  x.index = 0
-  return if x.buff != nil: 0 else: -1
 
 when isMainModule:
   main()
