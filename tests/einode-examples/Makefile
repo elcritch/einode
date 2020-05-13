@@ -33,6 +33,14 @@ client2:
 		--debugger:native \
 		enode_client2.nim 
 
+client3:
+	nim c --d:debug \
+		--gc:arc \
+		--passC=-I"$(INCLUDE_DIR)" \
+		--passL=-L"$(LIB_DIR) -lerl_interface -lei -lpthread " \
+		--debugger:native \
+		enode_client3.nim 
+
 
 clean:
 	rm -Rf enode_server1 enode_server2 enode_client2

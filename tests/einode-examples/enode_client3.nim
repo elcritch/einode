@@ -19,8 +19,6 @@ proc main*() =
   let arguments = commandLineParams()
   var node_name = arguments[0]
   echo("starting: " )
-  discard ei_init()
-
   var einode = newEiNode(node_name, "127.0.0.1", cookie = "secretcookie")
 
   ##  Listen socket
