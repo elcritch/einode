@@ -53,7 +53,7 @@ proc main*() =
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
   ##  Listen socket
-  var listen = my_listen(port)
+  var listen: Socket = my_listen(port)
 
   if ei_publish(ec.addr, port.cint) == -1:
     raise newException(LibraryError, "ERROR: publishing on port $1" % [$port])
@@ -74,9 +74,9 @@ proc main*() =
   discard new_ei_x_size(emsg.addr, 128)
 
   ##  Lopp flag
-  var loop: bool = true
-  while loop:
-    var mtype = ei_xreceive_msg(fd, addr(info), addr(emsg))
+  ## 
+  var mtype
+  while mtype = ei_xreceive_msg(fd, addr(info), addr(emsg)):
     if mtype == ERL_TICK:
       echo("tick: " & $mtype)
     elif mtype == ERL_ERROR:
@@ -87,11 +87,6 @@ proc main*() =
       echo("message: " & $mtype)
       if info.msgtype == ERL_REG_SEND:
         var res: cint = 0
-
-        echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
-                [ $info.msgtype, $(cast[seq[byte]](emsg.buff)), $emsg.index, $emsg.buffsz])
-
-        var eterms: ErlTerm = binaryToTerms(emsg)
 
         var main_msg: seq[ErlTerm] = eterms.getTuple()
         var rpc_msg = main_msg[2].getTuple()
