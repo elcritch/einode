@@ -120,10 +120,10 @@ iterator receive*(einode: var EiNode;
     var mtype = ErlApiType(ei_xreceive_msg(fd, addr(info), addr(emsg)))
     var msgtype = ErlMessageType(info.msgtype)
 
-    echo("ei_xreceive_msg: mtype: $1 msgtype: $2 " % [$mtype, $info.msgtype])
+    # echo("ei_xreceive_msg: mtype: $1 msgtype: $2 " % [$mtype, $info.msgtype])
 
-    echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
-          [ $info.msgtype, $(repr(emsg.buff)), $emsg.index, $emsg.buffsz])
+    # echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
+          # [ $info.msgtype, $(repr(emsg.buff)), $emsg.index, $emsg.buffsz])
 
     if mtype == ApiTick:
       if ignoreTick:

@@ -33,8 +33,8 @@ proc main*() =
 
   ##  Lopp flag
   for (msgtype, info, eterm) in receive(einode):
-    echo("message: " & $msgtype)
-    if msgtype == REG_SEND:
+    case msgtype
+    of REG_SEND:
       var res: cint = 0
 
       echo("erl_reg_send: msgtype: $1 " %
@@ -59,6 +59,8 @@ proc main*() =
       var rmsg = newETuple(@[newEAtom("cnode"), newETerm(res)])
 
       einode.send(to = info.`from`, msg = rmsg)
+    else:
+      echo("unhandled message: " & $msgtype)
 
 
 when isMainModule:
