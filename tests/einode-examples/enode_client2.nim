@@ -69,32 +69,33 @@ proc main*() =
       raise newException(LibraryError, "erl_error: " & $mtype)
     else:
       echo("message: " & $mtype)
-      var res: cint = 0
+      if info.msgtype == ERL_REG_SEND:
+        var res: cint = 0
 
-      echo("erl_reg_send: msgtype: $1 idx: $2 bufsz: $3 " %
-              [ $info.msgtype, $emsg.index, $emsg.buffsz])
+        echo("erl_reg_send: msgtype: $1 idx: $2 bufsz: $3 " %
+                [ $info.msgtype, $emsg.index, $emsg.buffsz])
 
-      var eterms: ErlTerm = binaryToTerms(emsg)
-      var main_msg: seq[ErlTerm] = eterms.getTuple()
+        var eterms: ErlTerm = binaryToTerms(emsg)
+        var main_msg: seq[ErlTerm] = eterms.getTuple()
 
-      var rpc_msg = main_msg[2].getTuple()
-      var msg_atom = rpc_msg[0].getAtom()
-      var msg_arg = rpc_msg[1].getInt32()
+        var rpc_msg = main_msg[2].getTuple()
+        var msg_atom = rpc_msg[0].getAtom()
+        var msg_arg = rpc_msg[1].getInt32()
 
-      if msg_atom.n == "foo":
-        echo( "foo: " & $msg_arg)
-        res = foo(msg_arg).cint
-      elif msg_atom.n == "bar":
-        echo( "bar: " & $msg_arg)
-        res = bar(msg_arg).cint
-      else:
-        echo("other: " & $msg_arg)
-        echo("other message: " & $msg_atom)
+        if msg_atom.n == "foo":
+          echo( "foo: " & $msg_arg)
+          res = foo(msg_arg).cint
+        elif msg_atom.n == "bar":
+          echo( "bar: " & $msg_arg)
+          res = bar(msg_arg).cint
+        else:
+          echo("other: " & $msg_arg)
+          echo("other message: " & $msg_atom)
 
-      var rmsg = newETuple(@[newEAtom("cnode"), newETerm(res)])
-      var ssout = termToBinary(rmsg)
+        var rmsg = newETuple(@[newEAtom("cnode"), newETerm(res)])
+        var ssout = termToBinary(rmsg)
 
-      discard ei_send(fd, addr(info.`from`), ssout.data, ssout.pos)
+        discard ei_send(fd, addr(info.`from`), ssout.data, ssout.pos)
 
 
 proc new_ei_x_size(x: ptr EiBuff; size: int): cint =

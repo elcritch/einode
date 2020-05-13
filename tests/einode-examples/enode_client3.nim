@@ -32,9 +32,9 @@ proc main*() =
   echo("Connected to: " & server_node);
 
   ##  Lopp flag
-  for (mtype, info, eterm) in receive(einode):
-    echo("message: " & $mtype)
-    if info.msgtype == ERL_REG_SEND:
+  for (msgtype, info, eterm) in receive(einode):
+    echo("message: " & $msgtype)
+    if msgtype == REG_SEND:
       var res: cint = 0
 
       echo("erl_reg_send: msgtype: $1 " %

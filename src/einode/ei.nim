@@ -42,41 +42,33 @@ var ERL_TICK* {.importc: "ERL_TICK", header: "<ei.h>".}: cint
 var ERL_MSG* {.importc: "ERL_MSG", header: "<ei.h>".}: cint
 var ERL_NO_TIMEOUT* {.importc: "ERL_NO_TIMEOUT", header: "<ei.h>".}: cint
 
-# const
-#   ERL_ERROR* = -1
-#   ERL_NO_DAEMON* = -2
-#   ERL_NO_PORT* = -3
-#   ERL_CONNECT_FAIL* = -4
-#   ERL_TIMEOUT* = -5
-#   ERL_NO_REMOTE* = -6
-#   ERL_TICK* = 0
-#   ERL_MSG* = 1
-#   ERL_NO_TIMEOUT* = -1
+type 
+  ErlApiType* = distinct cint 
 
-##  these are the control message types
+proc `$`*(e: ErlApiType): string = $(e.cint)
+proc `==`*(o: ErlApiType, e: ErlApiType): bool =  e.cint == o.cint
 
-var ERL_LINK* {.importc: "ERL_LINK", header: "<ei.h>".}: cint
-var ERL_SEND* {.importc: "ERL_SEND", header: "<ei.h>".}: cint
-var ERL_EXIT* {.importc: "ERL_EXIT", header: "<ei.h>".}: cint
-var ERL_UNLINK* {.importc: "ERL_UNLINK", header: "<ei.h>".}: cint
-var ERL_NODE_LINK* {.importc: "ERL_NODE_LINK", header: "<ei.h>".}: cint
-var ERL_REG_SEND* {.importc: "ERL_REG_SEND", header: "<ei.h>".}: cint
-var ERL_GROUP_LEADER* {.importc: "ERL_GROUP_LEADER", header: "<ei.h>".}: cint
-var ERL_EXIT2* {.importc: "ERL_EXIT2", header: "<ei.h>".}: cint
-var ERL_PASS_THROUGH* {.importc: "ERL_PASS_THROUGH", header: "<ei.h>".}: cint
+const
+  ApiNoRemote* = ErlApiType(-6)
+  ApiTimeout* = ErlApiType(-5)
+  ApiConnectFail* = ErlApiType(-4)
+  ApiNoPort* = ErlApiType(-3)
+  ApiNoDaemon* = ErlApiType(-2)
+  ApiError* = ErlApiType(-1)
+  ApiTick* = ErlApiType(0)
+  ApiMsg* = ErlApiType(1)
 
-# const
-#   ERL_LINK* = 1
-#   ERL_SEND* = 2
-#   ERL_EXIT* = 3
-#   ERL_UNLINK* = 4
-#   ERL_NODE_LINK* = 5
-#   ERL_REG_SEND* = 6
-#   ERL_GROUP_LEADER* = 7
-#   ERL_EXIT2* = 8
-#   ERL_PASS_THROUGH* = 'p'
+var ERL_LINK* {.importc: "ERL_LINK", header: "<ei.h>".}: ErlApiType
+var ERL_SEND* {.importc: "ERL_SEND", header: "<ei.h>".}: ErlApiType
+var ERL_EXIT* {.importc: "ERL_EXIT", header: "<ei.h>".}: ErlApiType
+var ERL_UNLINK* {.importc: "ERL_UNLINK", header: "<ei.h>".}: ErlApiType
+var ERL_NODE_LINK* {.importc: "ERL_NODE_LINK", header: "<ei.h>".}: ErlApiType
+var ERL_REG_SEND* {.importc: "ERL_REG_SEND", header: "<ei.h>".}: ErlApiType
+var ERL_GROUP_LEADER* {.importc: "ERL_GROUP_LEADER", header: "<ei.h>".}: ErlApiType
+var ERL_EXIT2* {.importc: "ERL_EXIT2", header: "<ei.h>".}: ErlApiType
+var ERL_PASS_THROUGH* {.importc: "ERL_PASS_THROUGH", header: "<ei.h>".}: ErlApiType
 
-##  new ones for tracing, from Kenneth
+# ##  new ones for tracing, from Kenneth
 
 var ERL_SEND_TT* {.importc: "ERL_SEND_TT", header: "<ei.h>".}: cint
 var ERL_EXIT_TT* {.importc: "ERL_EXIT_TT", header: "<ei.h>".}: cint
@@ -86,14 +78,38 @@ var ERL_MONITOR_P* {.importc: "ERL_MONITOR_P", header: "<ei.h>".}: cint
 var ERL_DEMONITOR_P* {.importc: "ERL_DEMONITOR_P", header: "<ei.h>".}: cint
 var ERL_MONITOR_P_EXIT* {.importc: "ERL_MONITOR_P_EXIT", header: "<ei.h>".}: cint
 
-# const
-#   ERL_SEND_TT* = 12
-#   ERL_EXIT_TT* = 13
-#   ERL_REG_SEND_TT* = 16
-#   ERL_EXIT2_TT* = 18
-#   ERL_MONITOR_P* = 19
-#   ERL_DEMONITOR_P* = 20
-#   ERL_MONITOR_P_EXIT* = 21
+
+### ENUM ? 
+
+##  FIXME just a few are documented, does it mean they can't be returned?
+
+type 
+  ErlMessageType* = distinct cint 
+
+proc `$`*(e: ErlMessageType): string = $(e.cint)
+proc `==`*(o: ErlMessageType, e: ErlMessageType): bool =  e.cint == o.cint
+
+const 
+  LINK* = ErlMessageType(1)
+  SEND* = ErlMessageType(2)
+  EXIT* = ErlMessageType(3)
+  UNLINK* = ErlMessageType(4)
+  NODE_LINK* = ErlMessageType(5)
+  REG_SEND* = ErlMessageType(6)
+  GROUP_LEADER* = ErlMessageType(7)
+  EXIT2* = ErlMessageType(8)
+  
+##  new ones for tracing, from Kenneth
+const
+  SEND_TT* = ErlMessageType(12)
+  EXIT_TT* = ErlMessageType(13)
+  REG_SEND_TT* = ErlMessageType(16)
+  EXIT2_TT* = ErlMessageType(18)
+  MONITOR_P* = ErlMessageType(19)
+  DEMONITOR_P* = ErlMessageType(20)
+  MONITOR_P_EXIT* = ErlMessageType(21)
+  PASS_THROUGH* = ErlMessageType(11)
+
 
 ##  --------------------------------------------------------------------
 ##            Defines used for ei_get_type_internal() output

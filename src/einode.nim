@@ -104,7 +104,7 @@ iterator receive*(einode: var EiNode;
                   size: int = 128;
                   ignoreTick = true;
                   raiseOnError = true):
-            tuple[mtype: cint, info: ErlangMsg, eterm: ErlTerm] =
+            tuple[mtype: ErlMessageType, info: ErlangMsg, eterm: ErlTerm] =
 
   var fd = einode.fd
   var info = ErlangMsg()
@@ -117,22 +117,27 @@ iterator receive*(einode: var EiNode;
   emsg.index = 0
 
   while einode.loop:
-    var mtype = ei_xreceive_msg(fd, addr(info), addr(emsg))
+    var mtype = ErlApiType(ei_xreceive_msg(fd, addr(info), addr(emsg)))
+    var msgtype = ErlMessageType(info.msgtype)
+
+    echo("ei_xreceive_msg: mtype: $1 msgtype: $2 " % [$mtype, $info.msgtype])
 
     echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
           [ $info.msgtype, $(repr(emsg.buff)), $emsg.index, $emsg.buffsz])
 
-    if mtype == ERL_TICK:
+    if mtype == ApiTick:
       if ignoreTick:
         continue
-    elif mtype == ERL_ERROR:
+    elif mtype == ApiError:
       if raiseOnError:
         raise newException(LibraryError, "erl_error: " & $mtype)
       else:
-        yield (mtype, info, binaryToTerms(emsg))
-    else:
+        yield (msgtype, info, binaryToTerms(emsg))
+    elif mtype == ApiMsg:
         # ERL_REG_SEND
-      yield (mtype, info, binaryToTerms(emsg))
+      yield (msgtype, info, binaryToTerms(emsg))
+    else:
+      raise newException(LibraryError, "unhandle message type: " & $mtype)
 
 
 proc send*(einode: var EiNode, to: ErlangPid, msg: var ErlTerm) =
