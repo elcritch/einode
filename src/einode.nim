@@ -21,7 +21,7 @@ type
     loop*: bool
 
 
-proc newEiNode*(name: string, ip: string, port: Port, cookie: string; alivename: string = "alpha"): EiNode =
+proc newEiNode*(name: string, ip: string,  cookie: string; port: Port = Port(0); alivename: string = "alpha"): EiNode =
 
   result.port = port
 
@@ -42,7 +42,7 @@ proc newEiNode*(name: string, ip: string, port: Port, cookie: string; alivename:
 
 
 
-proc publish*(einode: var EiNode; address: string = "") =
+proc publish_server*(einode: var EiNode; address: string = "") =
 
   var listen = newSocket()
   listen.bindAddr(einode.port, address=address) # bind all
@@ -61,8 +61,8 @@ proc publish*(einode: var EiNode; address: string = "") =
   if fd == ERL_ERROR:
     raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" % [repr(listen)])
 
-template accept*(einode: var EiNode, toNode: string, ip: string, body: untyped) =
-  var server_node = "$1@$2" % [ toNode, ip ]
+template connect_server*(einode: var EiNode, server_node: string, body: untyped) =
+  # var server_node = "$1@$2" % [ toNode, ip ]
   ##  Listen socket
   var connected = false
   while not connected:
@@ -72,7 +72,7 @@ template accept*(einode: var EiNode, toNode: string, ip: string, body: untyped) 
     else:
       connected = true
 
-iterator messages*(einode: EiNode; size: int = 128; ignoreTick = true; raiseOnError = true):
+iterator receive*(einode: var EiNode; size: int = 128; ignoreTick = true; raiseOnError = true):
                   tuple[mtype: cint, info: ErlangMsg, eterm: ErlTerm] =
   var info: ErlangMsg
   var emsg: EiBuff
@@ -98,3 +98,10 @@ iterator messages*(einode: EiNode; size: int = 128; ignoreTick = true; raiseOnEr
     elif mtype == ERL_ERROR:
       yield (mtype, info, binaryToTerms(emsg))
 
+
+proc send*(einode: var EiNode, to: var ErlangPid, rmsg: var ErlTerm) =
+  var ssout = termToBinary(rmsg)
+  discard ei_send(einode.fd,
+                  addr(to),
+                  ssout.data,
+                  ssout.pos)
