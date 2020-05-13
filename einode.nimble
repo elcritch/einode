@@ -4,16 +4,11 @@ version       = "0.1.0"
 author        = "Jaremy Creechley"
 description   = "A new awesome nimble package"
 license       = "Apache-2.0"
-installDirs   = @["nimler", "scripts"]
-installFiles  = @["nimler.nim"]
 srcDir        = "src"
-bin           = "test_node"
-
 
 # Dependencies
 
 requires "nim >= 1.2.0"
-requires "nimler >= 3.1.0"
 
 # Tests
 proc configTest() =

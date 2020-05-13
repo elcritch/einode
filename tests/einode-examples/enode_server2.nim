@@ -1,6 +1,5 @@
 ##  #include <erl_format.h>
 import strutils
-import sugar 
 import os
 import posix
 import segfaults

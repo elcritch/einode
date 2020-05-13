@@ -1,6 +1,5 @@
 ##  #include <erl_format.h>
 import strutils
-import sugar 
 import os
 import posix
 import segfaults
@@ -47,7 +46,7 @@ proc main*() =
   while not connected:
     fd = ei_connect(ec.addr, server_node.cstring)
     if fd < 0:
-      echo("ERROR: connecting to node: " & server_node)
+      echo("Warning: unable to connect to node: " & server_node)
       os.sleep(1_000)
     else:
       connected = true
