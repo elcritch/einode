@@ -4,8 +4,7 @@ import os
 import posix
 import segfaults
 import net
-import einode/codec
-import einode/ei 
+import einode
 
 const
   BUFSIZE* = 1000
