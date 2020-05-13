@@ -21,19 +21,28 @@ type
     loop*: bool
 
 
-proc newEiNode*(name: string, ip: string,  cookie: string; port: Port = Port(0); alivename: string = "alpha"): EiNode =
+proc newEiNode*(
+    name: string,
+    ip: string,
+    cookie: string;
+    port: Port = Port(0);
+    alivename: string = "alpha"): EiNode =
 
+  new(result)
   result.port = port
+  result.loop = true
 
   # creates a new EiNode 
+  echo "start server"
   discard ei_init()
 
   var node_addr: InAddr
+  var alive: string = alivename
   ##  32-bit IP number of host
   node_addr.s_addr = inet_addr(ip)
 
   if ei_connect_xinit(result.ec.addr,
-                      cstring(alivename),
+                      cstring(alive),
                       name,
                       name & "@" & ip,
                       node_addr.addr,
@@ -42,7 +51,7 @@ proc newEiNode*(name: string, ip: string,  cookie: string; port: Port = Port(0);
 
 
 
-proc publish_server*(einode: var EiNode; address: string = "") =
+proc publishServer*(einode: var EiNode; address: string = "") =
 
   var listen = newSocket()
   listen.bindAddr(einode.port, address=address) # bind all
@@ -61,7 +70,7 @@ proc publish_server*(einode: var EiNode; address: string = "") =
   if fd == ERL_ERROR:
     raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" % [repr(listen)])
 
-template connect_server*(einode: var EiNode, server_node: string, body: untyped) =
+template connectServer*(einode: var EiNode, server_node: string, body: untyped) =
   # var server_node = "$1@$2" % [ toNode, ip ]
   ##  Listen socket
   var connected = false
@@ -70,10 +79,15 @@ template connect_server*(einode: var EiNode, server_node: string, body: untyped)
     if einode.fd < 0:
       body
     else:
+      echo "connected with fd: " & $einode.fd
       connected = true
 
-iterator receive*(einode: var EiNode; size: int = 128; ignoreTick = true; raiseOnError = true):
-                  tuple[mtype: cint, info: ErlangMsg, eterm: ErlTerm] =
+iterator receive*(einode: var EiNode;
+                  size: int = 128;
+                  ignoreTick = true;
+                  raiseOnError = true):
+            tuple[mtype: cint, info: ErlangMsg, eterm: ErlTerm] =
+
   var info: ErlangMsg
   var emsg: EiBuff
 
@@ -81,11 +95,13 @@ iterator receive*(einode: var EiNode; size: int = 128; ignoreTick = true; raiseO
   emsg.buffsz = size.cint
   emsg.index = 0
 
-  # echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
-  #     [ $info.msgtype, $(cast[seq[byte]](emsg.buff)), $emsg.index, $emsg.buffsz])
 
   while einode.loop:
+    echo "xreceive"
     var mtype = ei_xreceive_msg(einode.fd, addr(info), addr(emsg))
+
+    echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
+          [ $info.msgtype, $(cast[seq[byte]](emsg.buff)), $emsg.index, $emsg.buffsz])
 
     if mtype == ERL_TICK:
       if ignoreTick:

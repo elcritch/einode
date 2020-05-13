@@ -23,14 +23,14 @@ proc main*() =
 
   ##  Listen socket
   var server_node = "e1@127.0.0.1"
-  connect_server(einode, server_node):
+  einode.connectServer(server_node):
     echo("Warning: unable to connect to node: " & server_node)
     os.sleep(1_000)
     
   echo("Connected to: " & server_node);
 
   ##  Lopp flag
-  for (mtype, info, eterm) in einode.receive():
+  for (mtype, info, eterm) in receive(einode):
     echo("message: " & $mtype)
     if info.msgtype == ERL_REG_SEND:
       var res: cint = 0
