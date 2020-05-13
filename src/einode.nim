@@ -99,9 +99,14 @@ iterator receive*(einode: var EiNode; size: int = 128; ignoreTick = true; raiseO
       yield (mtype, info, binaryToTerms(emsg))
 
 
-proc send*(einode: var EiNode, to: var ErlangPid, rmsg: var ErlTerm) =
-  var ssout = termToBinary(rmsg)
+proc send*(einode: var EiNode, to: ErlangPid, msg: var ErlTerm) =
+  var pid = to
+  var ssout = termToBinary(msg)
   discard ei_send(einode.fd,
-                  addr(to),
+                  addr(pid),
                   ssout.data,
                   ssout.pos)
+
+proc send*(einode: var EiNode, to: ErlangMsg, msg: var ErlTerm) =
+  send(einode, to.`from`, msg)
+

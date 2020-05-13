@@ -59,9 +59,8 @@ proc main*() =
         echo("other message: " & $msg_atom)
 
       var rmsg = newETuple(@[newEAtom("cnode"), newETerm(res)])
-      var ssout = termToBinary(rmsg)
 
-      discard ei_send(fd, addr(info.`from`), ssout.data, ssout.pos)
+      einode.send(to = info.`from`, msg = rmsg)
 
 
 proc new_ei_x_size(x: ptr EiBuff; size: int): cint =
