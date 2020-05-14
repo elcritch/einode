@@ -7,8 +7,9 @@
 
 import unittest
 
-import nimler_node
+import einode
 test "can add":
   check add(5, 5) == 10
   # check add(5, 5) == 0
   echo "hi"
+
