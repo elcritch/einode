@@ -1,4 +1,4 @@
-# nimler_node
+# EiNode
 
-nimler_node -- experimental erlang/elixir c node library for Nim
+EiNode -- experimental erlang/elixir c node library for Nim
 
