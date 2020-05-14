@@ -1,8 +1,5 @@
 
 import strutils
-import os
-import posix
-import net
 import options
 
 import einode/codec
@@ -18,8 +15,7 @@ type
     cookie: string
     alivename: string 
     ec*: EiCnode
-    port*: Port
-    listen*: Option[Socket]
+    port*: int
     conn*: ErlConnect
     fd*: cint
     loop*: bool
@@ -31,7 +27,7 @@ proc newEiNode*(
     name: string,
     ip: string,
     cookie: string;
-    port: Port = Port(0);
+    port: int;
     alivename: string = "alpha"): EiNode =
 
   new(result)
@@ -60,26 +56,6 @@ proc initialize*(einode: var EiNode) =
                       "secretcookie", 0) < 0:
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
-
-
-proc publishServer*(einode: var EiNode; address: string = "") =
-
-  var listen = newSocket()
-  listen.bindAddr(einode.port, address=address) # bind all
-  listen.setSockOpt(OptReuseAddr, true)
-  listen.setSockOpt(OptKeepAlive, true)
-  listen.listen()
-
-  einode.listen = some(listen)
-  if ei_publish(einode.ec.addr, einode.port.cint) == -1:
-    raise newException(LibraryError, "ERROR: publishing on port $1" % [$(einode.port)])
-
-  var fd = ei_accept(einode.ec.addr,
-                     listen.getFd().cint,
-                     einode.conn.addr)
-
-  if fd == ERL_ERROR:
-    raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" % [repr(listen)])
 
 template connectServer*(einode: var EiNode, server_node: string, body: untyped) =
   # var server_node = "$1@$2" % [ toNode, ip ]
