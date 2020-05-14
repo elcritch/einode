@@ -93,12 +93,12 @@ template connectServer*(einode: var EiNode, server_node: string, body: untyped) 
       echo "connected with fd: " & $einode.fd
       connected = true
 
-proc new_ei_x_size(x: ptr EiBuff; size: int): cint =
-  # x.buff = cast[cstring](ei_malloc(size))
-  x.buff = cast[cstring](alloc(size))
-  x.buffsz = size.cint
-  x.index = 0
-  return if x.buff != nil: 0 else: -1
+# proc new_ei_x_size(x: ptr EiBuff; size: int): cint =
+#   # x.buff = cast[cstring](ei_malloc(size))
+#   x.buff = cast[cstring](alloc(size))
+#   x.buffsz = size.cint
+#   x.index = 0
+#   return if x.buff != nil: 0 else: -1
 
 iterator receive*(einode: var EiNode;
                   size: int = 128;
