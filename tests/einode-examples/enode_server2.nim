@@ -36,7 +36,7 @@ proc main*() =
       "cnode1"
 
   echo("starting: " )
-  var einode = newEiNode(node_name, "127.0.0.1", cookie = "secretcookie")
+  var einode = newEiNode(node_name, "127.0.0.1", cookie = "secretcookie", port = port)
   einode.initialize()
 
   ##  Listen socket
@@ -48,15 +48,12 @@ proc main*() =
 
   echo("listening on port: $1" % [$port])
   einode.serverAccept()
-
-  var info: ErlangMsg
   var emsg: EiBuff
 
   discard new_ei_x_size(emsg.addr, 128)
 
   ##  Lopp flag
-  ## 
-  ##  Lopp flag
+  echo("receiving messages: " )
   for (msgtype, info, eterm) in receive(einode):
     case msgtype
     of REG_SEND:

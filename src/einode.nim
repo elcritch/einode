@@ -31,7 +31,7 @@ proc newEiNode*(
     name: string,
     ip: string,
     cookie: string;
-    port: Port = Port(0);
+    port: Port = Port(4370);
     alivename: string = "alpha"): EiNode =
 
   new(result)
@@ -61,7 +61,8 @@ proc initialize*(einode: var EiNode) =
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
 
-proc serverStart*(einode: var EiNode; on_address: string = "") =
+proc serverStart*(einode: var EiNode; on_address: string = "", port: Port = Port(4370)) =
+  einode.port = port
 
   var sock = newSocket()
   sock.bindAddr(einode.port, address=on_address) # bind all

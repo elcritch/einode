@@ -40,7 +40,7 @@ proc main*() =
 
   var ec: EiCnode
 
-  if ei_connect_xinit(ec.addr, "alpha", "cnode", "cnode@127.0.0.1", node_addr.addr,
+  if ei_connect_xinit(ec.addr, "alpha", "cnode1", "cnode1@127.0.0.1", node_addr.addr,
                      "secretcookie", 0) < 0:
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
@@ -69,6 +69,7 @@ proc main*() =
   ##  Lopp flag
   var loop: bool = true
   while loop:
+    echo("loop: ")
     var got: cint = ei_receive_msg(fd, addr(info), addr(emsg))
     if got == ERL_TICK:
       echo("tick: " & $got)
