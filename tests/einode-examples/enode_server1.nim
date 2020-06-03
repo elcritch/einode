@@ -79,7 +79,7 @@ proc main*() =
     else:
       ##  ETERM *fromp, *tuplep, *fnp, *argp, *resp;
       echo("message: " & $got)
-      if info.msgtype == ERL_REG_SEND:
+      if info.msgtype == ERL_REG_SEND.clong:
         var res: cint = 0
         var version: cint
         var arity: cint

@@ -61,25 +61,33 @@ proc initialize*(einode: var EiNode) =
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
 
+proc serverStart*(einode: var EiNode; on_address: string = "") =
 
-proc publishServer*(einode: var EiNode; address: string = "") =
+  var sock = newSocket()
+  sock.bindAddr(einode.port, address=on_address) # bind all
+  sock.setSockOpt(OptReuseAddr, true)
+  sock.setSockOpt(OptKeepAlive, true)
+  sock.listen()
 
-  var listen = newSocket()
-  listen.bindAddr(einode.port, address=address) # bind all
-  listen.setSockOpt(OptReuseAddr, true)
-  listen.setSockOpt(OptKeepAlive, true)
-  listen.listen()
+  einode.listen = some(sock)
 
-  einode.listen = some(listen)
+proc serverPublish*(einode: var EiNode) =
   if ei_publish(einode.ec.addr, einode.port.cint) == -1:
     raise newException(LibraryError, "ERROR: publishing on port $1" % [$(einode.port)])
 
+proc serverAccept*(einode: var EiNode) =
+  if einode.listen.isNone():
+    raise newException(LibraryError, "ERROR: socket must be started " )
+
+  var sock: Socket = einode.listen.get()
+
   var fd = ei_accept(einode.ec.addr,
-                     listen.getFd().cint,
+                     sock.getFd().cint,
                      einode.conn.addr)
 
   if fd == ERL_ERROR:
-    raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" % [repr(listen)])
+    var fd_id = repr(sock.getFd())
+    raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" & fd_id)
 
 template connectServer*(einode: var EiNode, server_node: string, body: untyped) =
   # var server_node = "$1@$2" % [ toNode, ip ]

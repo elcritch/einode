@@ -4,8 +4,8 @@ import os
 import posix
 import segfaults
 import net
-import einode/codec
-import einode/ei 
+import einode
+# import einode/publish 
 
 const
   BUFSIZE* = 1000
@@ -36,37 +36,18 @@ proc main*() =
       "cnode1"
 
   echo("starting: " )
-
-  discard ei_init()
-
-  var node_addr: InAddr
-  ##  32-bit IP number of host
-  node_addr.s_addr = inet_addr("127.0.0.1")
-
-  var ec: EiCnode
-
-  if ei_connect_xinit(ec.addr, "alpha",
-                      node_name,
-                      node_name & "@127.0.0.1",
-                      node_addr.addr,
-                      "secretcookie", 0) < 0:
-    raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
+  var einode = newEiNode(node_name, "127.0.0.1", cookie = "secretcookie")
+  einode.initialize()
 
   ##  Listen socket
-  var listen: Socket = my_listen(port)
-
-  if ei_publish(ec.addr, port.cint) == -1:
-    raise newException(LibraryError, "ERROR: publishing on port $1" % [$port])
-
-  var conn: ErlConnect
-
-  ##  Connection data
-  var fd = ei_accept(ec.addr, listen.getFd().cint, conn.addr)
-  if fd == ERL_ERROR:
-    raise newException(LibraryError, "ERROR: erl_accept on listen socket $1" % [repr(listen)])
+  # var listen: Socket = my_listen(port)
+  # if ei_publish(ec.addr, port.cint) == -1:
+    # raise newException(LibraryError, "ERROR: publishing on port $1" % [$port])
+  einode.serverStart(on_address="")
+  einode.serverPublish()
 
   echo("listening on port: $1" % [$port])
-  echo("Connected to `$1`" % [ $(cast[cstring](conn.nodename[0].addr))])
+  einode.serverAccept()
 
   var info: ErlangMsg
   var emsg: EiBuff
@@ -75,38 +56,36 @@ proc main*() =
 
   ##  Lopp flag
   ## 
-  var mtype
-  while mtype = ei_xreceive_msg(fd, addr(info), addr(emsg)):
-    if mtype == ERL_TICK:
-      echo("tick: " & $mtype)
-    elif mtype == ERL_ERROR:
-      echo("err: " )
-      loop = false
-      raise newException(LibraryError, "erl_error: " & $mtype)
+  ##  Lopp flag
+  for (msgtype, info, eterm) in receive(einode):
+    case msgtype
+    of REG_SEND:
+      var res: cint = 0
+
+      echo("erl_reg_send: msgtype: $1 " %
+              [ $info.msgtype, ])
+
+      var main_msg: seq[ErlTerm] = eterm.getTuple()
+
+      var rpc_msg = main_msg[2].getTuple()
+      var msg_atom = rpc_msg[0].getAtom()
+      var msg_arg = rpc_msg[1].getInt32()
+
+      if msg_atom.n == "foo":
+        echo( "foo: " & $msg_arg)
+        res = foo(msg_arg).cint
+      elif msg_atom.n == "bar":
+        echo( "bar: " & $msg_arg)
+        res = bar(msg_arg).cint
+      else:
+        echo("other: " & $msg_arg)
+        echo("other message: " & $msg_atom)
+
+      var rmsg = newETuple(@[newEAtom("cnode"), newETerm(res)])
+
+      einode.send(to = info.`from`, msg = rmsg)
     else:
-      echo("message: " & $mtype)
-      if info.msgtype == ERL_REG_SEND:
-        var res: cint = 0
-
-        var main_msg: seq[ErlTerm] = eterms.getTuple()
-        var rpc_msg = main_msg[2].getTuple()
-        var msg_atom = rpc_msg[0].getAtom()
-        var msg_arg = rpc_msg[1].getInt32()
-
-        if msg_atom.n == "foo":
-          echo( "foo: " & $msg_arg)
-          res = foo(msg_arg).cint
-        elif msg_atom.n == "bar":
-          echo( "bar: " & $msg_arg)
-          res = bar(msg_arg).cint
-        else:
-          echo("other: " & $msg_arg)
-          echo("other message: " & $msg_atom)
-
-        var rmsg = newETuple(@[newEAtom("cnode"), newETerm(res)])
-        var ssout = termToBinary(rmsg)
-
-        discard ei_send(fd, addr(info.`from`), ssout.data, ssout.pos)
+      echo("unhandled message: " & $msgtype)
 
 
 proc new_ei_x_size(x: ptr EiBuff; size: int): cint =
