@@ -18,14 +18,6 @@ proc foo*(x: int): int =
 proc bar*(y: int): int =
     return y * 2
 
-proc my_listen(port: Port): Socket =
-  var socket = newSocket()
-  socket.bindAddr(port, address="")
-  socket.setSockOpt(OptReuseAddr, true)
-  socket.setSockOpt(OptKeepAlive, true)
-  socket.listen()
-  return socket
-
 proc main*() =
   let arguments = commandLineParams()
   var port: Port = Port(parseInt($(arguments[0])))
@@ -33,7 +25,7 @@ proc main*() =
     if len(arguments) == 2:
       arguments[1]
     else:
-      "cnode1"
+      "cnode2"
 
   echo("starting: " )
   var einode = newEiNode(node_name, "127.0.0.1", cookie = "secretcookie", port = port)
@@ -46,15 +38,13 @@ proc main*() =
   einode.serverStart(on_address="")
   einode.serverPublish()
 
-  echo("listening on port: $1" % [$port])
   einode.serverAccept()
   var emsg: EiBuff
 
-  discard new_ei_x_size(emsg.addr, 128)
-
+  echo("connected on port: " & $einode.port)
   ##  Lopp flag
   echo("receiving messages: " )
-  for (msgtype, info, eterm) in receive(einode):
+  for (msgtype, info, eterm) in receiveMessages(einode):
     case msgtype
     of REG_SEND:
       var res: cint = 0

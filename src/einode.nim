@@ -61,9 +61,7 @@ proc initialize*(einode: var EiNode) =
     raise newException(LibraryError, "ERROR: when initializing ei_connect_xinit ")
 
 
-proc serverStart*(einode: var EiNode; on_address: string = "", port: Port = Port(4370)) =
-  einode.port = port
-
+proc serverStart*(einode: var EiNode; on_address: string = "") =
   var sock = newSocket()
   sock.bindAddr(einode.port, address=on_address) # bind all
   sock.setSockOpt(OptReuseAddr, true)
@@ -109,7 +107,7 @@ template connectServer*(einode: var EiNode, server_node: string, body: untyped) 
 #   x.index = 0
 #   return if x.buff != nil: 0 else: -1
 
-iterator receive*(einode: var EiNode;
+iterator receiveMessages*(einode: var EiNode;
                   size: int = 128;
                   ignoreTick = true;
                   raiseOnError = true):
@@ -129,10 +127,10 @@ iterator receive*(einode: var EiNode;
     var mtype = ErlApiType(ei_xreceive_msg(fd, addr(info), addr(emsg)))
     var msgtype = ErlMessageType(info.msgtype)
 
-    # echo("ei_xreceive_msg: mtype: $1 msgtype: $2 " % [$mtype, $info.msgtype])
+    echo("ei_xreceive_msg: mtype: $1 msgtype: $2 " % [$mtype, $info.msgtype])
 
-    # echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
-          # [ $info.msgtype, $(repr(emsg.buff)), $emsg.index, $emsg.buffsz])
+    echo("erl_reg_send: msgtype: $1 buff: $2 idx: $3 bufsz: $4 " %
+          [ $info.msgtype, $(repr(emsg.buff)), $emsg.index, $emsg.buffsz])
 
     if mtype == ApiTick:
       if ignoreTick:
